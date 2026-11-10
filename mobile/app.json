@@ -1,24 +1,31 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "Calorie Calculator",
+    "slug": "calorie-calculator-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.subhrajeet.caloriecalculator"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#0B0F19",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
+      },
+      "package": "com.subhrajeet.caloriecalculator"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "2c9078f3-44dd-4e4a-8a58-a6fbfb6911f6"
+      }
     }
   }
 }
