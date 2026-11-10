@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+backend/vendor/
+
+# Environment Variables
+backend/.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Databases & Local Data
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+backend/calorie_calculator.db
+
+# Build Artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+backend/server
+backend/server.exe
+mobile/.expo/
+mobile/web-build/
+mobile/dist/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# System Files
+.DS_Store
+Thumbs.db
