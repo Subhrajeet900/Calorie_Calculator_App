@@ -3,9 +3,8 @@ import { calculateAll, calculateItemNutrition } from '../utils/calculator';
 import { Platform } from 'react-native';
 
 // Default backend host:
-// - Android Emulator: 10.0.2.2
-// - Web / iOS Simulator / Default: localhost
-const DEFAULT_HOST = Platform.OS === 'android' ? 'http://10.0.2.2:8080' : 'http://localhost:8080';
+// Uses your PC's local Wi-Fi IP so physical phones can reach the Go backend directly:
+const DEFAULT_HOST = Platform.OS === 'web' ? 'http://localhost:8080' : 'http://192.168.43.45:8080';
 
 let currentServerUrl = `${DEFAULT_HOST}/api`;
 
