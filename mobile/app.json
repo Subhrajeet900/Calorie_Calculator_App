@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Calorie Calculator",
-    "slug": "calorie-calculator-app",
+    "slug": "calorie-calculator",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
