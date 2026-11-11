@@ -11,6 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS } from '../constants/theme';
 import { api } from '../api/client';
+import MuscleLogo from './MuscleLogo';
 
 export default function WeeklyProgressModal({ visible, onClose, selectedDate }) {
   const [loading, setLoading] = useState(false);
@@ -49,9 +50,12 @@ export default function WeeklyProgressModal({ visible, onClose, selectedDate }) 
         <View style={styles.sheetContainer}>
           {/* Header */}
           <View style={styles.sheetHeader}>
-            <View>
-              <Text style={styles.sheetTitle}>Weekly Progress</Text>
-              <Text style={styles.sheetSubtitle}>7-Day Intake & Consistency Trends</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <MuscleLogo size={36} iconSize={20} />
+              <View>
+                <Text style={styles.sheetTitle}>Weekly Trajectory</Text>
+                <Text style={styles.sheetSubtitle}>7-Day Intake & Consistency Trends</Text>
+              </View>
             </View>
             <TouchableOpacity style={styles.closeBtn} onPress={onClose} activeOpacity={0.7}>
               <Ionicons name="close" size={20} color={COLORS.textSecondary} />

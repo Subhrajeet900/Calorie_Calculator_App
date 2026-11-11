@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  SafeAreaView,
   StatusBar,
   ScrollView,
   RefreshControl,
@@ -8,7 +7,9 @@ import {
   View,
   ActivityIndicator,
   Text,
+  Platform,
 } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS, SPACING } from './src/constants/theme';
 import { storage } from './src/utils/storage';
 import { api } from './src/api/client';
@@ -17,6 +18,7 @@ import { api } from './src/api/client';
 import Header from './src/components/Header';
 import CalorieRing from './src/components/CalorieRing';
 import MacroCard from './src/components/MacroCard';
+import WaterTracker from './src/components/WaterTracker';
 import MealCard from './src/components/MealCard';
 import FoodSearchModal from './src/components/FoodSearchModal';
 import WeeklyProgressModal from './src/components/WeeklyProgressModal';
@@ -24,6 +26,14 @@ import ProfileModal from './src/components/ProfileModal';
 import AuthModal from './src/components/AuthModal';
 
 export default function App() {
+  return (
+    <SafeAreaProvider>
+      <MainApp />
+    </SafeAreaProvider>
+  );
+}
+
+function MainApp() {
   const [user, setUser] = useState(null);
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split('T')[0]
@@ -54,7 +64,6 @@ export default function App() {
         setUser(savedUser);
         loadDayData(selectedDate);
       } else {
-        // Show auth modal
         setAuthVisible(true);
       }
     } catch (e) {
@@ -137,7 +146,7 @@ export default function App() {
   const getMeal = (type) => meals.find((m) => m.meal_type === type);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.background} />
 
       {/* Header Bar */}
@@ -154,13 +163,14 @@ export default function App() {
       {loading && !daySummary ? (
         <View style={styles.centerLoading}>
           <ActivityIndicator size="large" color={COLORS.primary} />
-          <Text style={styles.loadingText}>Loading Nutrition Data...</Text>
+          <Text style={styles.loadingText}>Syncing Body Fuel Data...</Text>
         </View>
       ) : (
         <ScrollView
           style={styles.container}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
+          bounces={true}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -170,14 +180,14 @@ export default function App() {
             />
           }
         >
-          {/* Calorie Target Card */}
+          {/* Calorie Target Hero Widget */}
           <CalorieRing
             target={daySummary?.target_calories || user?.target_calories || 2000}
             consumed={daySummary?.total_calories || 0}
             remaining={daySummary?.remaining_calories ?? (user?.target_calories || 2000)}
           />
 
-          {/* Macro Breakdown Card */}
+          {/* Macro Breakdown Capsules */}
           <MacroCard
             targetProtein={daySummary?.target_protein || user?.target_protein || 150}
             targetCarbs={daySummary?.target_carbs || user?.target_carbs || 225}
@@ -187,9 +197,12 @@ export default function App() {
             consumedFat={daySummary?.total_fat || 0}
           />
 
-          {/* 4 Meal Cards */}
+          {/* Daily Hydration Cockpit */}
+          <WaterTracker date={selectedDate} />
+
+          {/* 4 Fuel Sections */}
           <View style={styles.mealsSection}>
-            <Text style={styles.sectionHeader}>MEALS LOGGED</Text>
+            <Text style={styles.sectionHeader}>FUEL LOGS</Text>
 
             <MealCard
               mealType="breakfast"
@@ -224,7 +237,7 @@ export default function App() {
             />
           </View>
 
-          <View style={{ height: 40 }} />
+          <View style={{ height: 60 }} />
         </ScrollView>
       )}
 
@@ -269,7 +282,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   scrollContent: {
-    paddingBottom: SPACING.xxl,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 20,
   },
   centerLoading: {
     flex: 1,
@@ -280,15 +293,17 @@ const styles = StyleSheet.create({
   loadingText: {
     color: COLORS.textSecondary,
     fontSize: 13,
+    fontWeight: '600',
+    letterSpacing: 0.5,
   },
   mealsSection: {
-    marginTop: SPACING.lg,
+    marginTop: SPACING.md,
   },
   sectionHeader: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: 10,
+    fontWeight: '800',
     color: COLORS.textMuted,
-    letterSpacing: 0.8,
+    letterSpacing: 1.5,
     marginHorizontal: SPACING.lg,
     marginBottom: 2,
   },

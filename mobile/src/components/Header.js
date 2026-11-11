@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS } from '../constants/theme';
+import MuscleLogo from './MuscleLogo';
 
 export default function Header({
   date,
@@ -36,12 +37,15 @@ export default function Header({
       {/* Top row: Brand & Action Icons */}
       <View style={styles.topRow}>
         <View style={styles.brandRow}>
-          <View style={styles.logoBadge}>
-            <Ionicons name="flame" size={18} color={COLORS.primary} />
-          </View>
-          <View>
-            <Text style={styles.appName}>CalorieCalc</Text>
-            <Text style={styles.appTagline}>Privacy-First Tracker</Text>
+          <MuscleLogo size={38} iconSize={22} />
+          <View style={styles.brandTextCol}>
+            <View style={styles.titleWithBadge}>
+              <Text style={styles.appName}>CalCalc</Text>
+              <View style={styles.proPill}>
+                <Text style={styles.proPillText}>PRO</Text>
+              </View>
+            </View>
+            <Text style={styles.appTagline}>ELITE BODY FUEL</Text>
           </View>
         </View>
 
@@ -52,28 +56,28 @@ export default function Header({
             activeOpacity={0.7}
             accessibilityLabel="Weekly Progress"
           >
-            <Ionicons name="bar-chart-outline" size={20} color={COLORS.text} />
+            <Ionicons name="stats-chart" size={17} color={COLORS.primary} />
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.iconBtn, styles.profileBtn]}
             onPress={onOpenProfile}
             activeOpacity={0.7}
-            accessibilityLabel="Profile & Calculator"
+            accessibilityLabel="Profile & Targets"
           >
-            <Ionicons name="person-outline" size={18} color={COLORS.primary} />
+            <Ionicons name="person" size={17} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Bottom row: Date Navigator */}
+      {/* Date Navigator Bar */}
       <View style={styles.dateNavigator}>
         <TouchableOpacity
           style={styles.dateArrow}
           onPress={onPrevDate}
           activeOpacity={0.6}
         >
-          <Ionicons name="chevron-back" size={20} color={COLORS.textSecondary} />
+          <Ionicons name="chevron-back" size={18} color={COLORS.textSecondary} />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -81,7 +85,7 @@ export default function Header({
           onPress={onToday}
           activeOpacity={0.7}
         >
-          <Ionicons name="calendar-outline" size={15} color={COLORS.primary} />
+          <Ionicons name="calendar-outline" size={14} color={COLORS.primary} />
           <Text style={styles.dateText}>{formatDateDisplay()}</Text>
           {!isToday() && (
             <View style={styles.todayIndicator}>
@@ -95,7 +99,7 @@ export default function Header({
           onPress={onNextDate}
           activeOpacity={0.6}
         >
-          <Ionicons name="chevron-forward" size={20} color={COLORS.textSecondary} />
+          <Ionicons name="chevron-forward" size={18} color={COLORS.textSecondary} />
         </TouchableOpacity>
       </View>
     </View>
@@ -105,8 +109,8 @@ export default function Header({
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.md,
-    paddingBottom: SPACING.md,
+    paddingTop: SPACING.sm,
+    paddingBottom: SPACING.sm,
     backgroundColor: COLORS.background,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.surfaceBorder,
@@ -115,30 +119,47 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.sm,
   },
   brandRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
   },
-  logoBadge: {
-    width: 36,
-    height: 36,
-    borderRadius: RADIUS.md,
-    backgroundColor: COLORS.primaryAlpha,
+  brandTextCol: {
     justifyContent: 'center',
+  },
+  titleWithBadge: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 6,
   },
   appName: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 20,
+    fontWeight: '900',
     color: COLORS.text,
-    letterSpacing: 0.3,
+    letterSpacing: 0.5,
+  },
+  proPill: {
+    backgroundColor: COLORS.primaryAlpha,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: RADIUS.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 245, 155, 0.3)',
+  },
+  proPillText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: COLORS.primary,
+    letterSpacing: 0.5,
   },
   appTagline: {
-    fontSize: 11,
+    fontSize: 10,
+    fontWeight: '700',
     color: COLORS.textMuted,
+    letterSpacing: 1.2,
+    marginTop: 1,
   },
   iconButtons: {
     flexDirection: 'row',
@@ -156,8 +177,8 @@ const styles = StyleSheet.create({
     borderColor: COLORS.surfaceBorder,
   },
   profileBtn: {
-    backgroundColor: COLORS.primaryAlpha,
-    borderColor: 'rgba(16, 185, 129, 0.3)',
+    backgroundColor: COLORS.primaryDark,
+    borderColor: COLORS.primary,
   },
   dateNavigator: {
     flexDirection: 'row',
@@ -166,13 +187,13 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.lg,
     paddingHorizontal: SPACING.xs,
-    paddingVertical: SPACING.xs,
+    paddingVertical: 3,
     borderWidth: 1,
     borderColor: COLORS.surfaceBorder,
   },
   dateArrow: {
-    width: 36,
-    height: 36,
+    width: 34,
+    height: 34,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: RADIUS.md,
@@ -181,16 +202,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.xs,
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SPACING.sm,
     paddingVertical: SPACING.xs,
   },
   dateText: {
     color: COLORS.text,
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 0.2,
   },
   todayIndicator: {
-    backgroundColor: COLORS.surfaceBorder,
+    backgroundColor: COLORS.surfaceLight,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: RADIUS.full,
@@ -199,7 +221,6 @@ const styles = StyleSheet.create({
   todayIndicatorText: {
     color: COLORS.primary,
     fontSize: 10,
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });
-

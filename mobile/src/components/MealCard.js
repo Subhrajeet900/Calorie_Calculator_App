@@ -3,18 +3,27 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS } from '../constants/theme';
 
-const MEAL_ICONS = {
-  breakfast: 'sunny-outline',
-  lunch: 'restaurant-outline',
-  dinner: 'moon-outline',
-  snack: 'cafe-outline',
-};
-
-const MEAL_NAMES = {
-  breakfast: 'Breakfast',
-  lunch: 'Lunch',
-  dinner: 'Dinner',
-  snack: 'Snacks',
+const MEAL_CONFIG = {
+  breakfast: {
+    title: 'Breakfast',
+    sub: 'Morning Fuel',
+    icon: 'sunny-outline',
+  },
+  lunch: {
+    title: 'Lunch',
+    sub: 'Midday Power',
+    icon: 'restaurant-outline',
+  },
+  dinner: {
+    title: 'Dinner',
+    sub: 'Night Recovery',
+    icon: 'moon-outline',
+  },
+  snack: {
+    title: 'Snacks',
+    sub: 'Micro Energy',
+    icon: 'flash-outline',
+  },
 };
 
 export default function MealCard({
@@ -25,8 +34,7 @@ export default function MealCard({
   onDeleteItem,
 }) {
   const items = meal?.items || [];
-  const iconName = MEAL_ICONS[mealType] || 'fast-food-outline';
-  const displayName = MEAL_NAMES[mealType] || mealType;
+  const config = MEAL_CONFIG[mealType] || MEAL_CONFIG.breakfast;
 
   return (
     <View style={styles.card}>
@@ -34,13 +42,11 @@ export default function MealCard({
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <View style={styles.iconCircle}>
-            <Ionicons name={iconName} size={18} color={COLORS.primary} />
+            <Ionicons name={config.icon} size={16} color={COLORS.primary} />
           </View>
           <View>
-            <Text style={styles.mealTitle}>{displayName}</Text>
-            <Text style={styles.itemCountText}>
-              {items.length} {items.length === 1 ? 'item' : 'items'}
-            </Text>
+            <Text style={styles.mealTitle}>{config.title}</Text>
+            <Text style={styles.mealSub}>{config.sub}</Text>
           </View>
         </View>
 
@@ -82,7 +88,7 @@ export default function MealCard({
                 activeOpacity={0.6}
                 accessibilityLabel="Delete item"
               >
-                <Ionicons name="trash-outline" size={16} color={COLORS.textMuted} />
+                <Ionicons name="trash-outline" size={15} color={COLORS.textMuted} />
               </TouchableOpacity>
             </View>
           ))}
@@ -95,8 +101,8 @@ export default function MealCard({
         onPress={() => onAddFood(mealType)}
         activeOpacity={0.7}
       >
-        <Ionicons name="add" size={16} color={COLORS.primary} />
-        <Text style={styles.addBtnText}>Add Food</Text>
+        <Ionicons name="add-circle" size={16} color={COLORS.primary} />
+        <Text style={styles.addBtnText}>+ Log to {config.title}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -111,12 +117,17 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
     borderWidth: 1,
     borderColor: COLORS.surfaceBorder,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 3,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: SPACING.sm,
+    marginBottom: SPACING.xs,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -124,47 +135,53 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   iconCircle: {
-    width: 36,
-    height: 36,
+    width: 34,
+    height: 34,
     borderRadius: RADIUS.md,
     backgroundColor: COLORS.primaryAlpha,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 245, 155, 0.2)',
   },
   mealTitle: {
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: '800',
     color: COLORS.text,
   },
-  itemCountText: {
-    fontSize: 11,
+  mealSub: {
+    fontSize: 10,
+    fontWeight: '600',
     color: COLORS.textMuted,
+    letterSpacing: 0.4,
   },
   headerRight: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    gap: 4,
+    gap: 3,
   },
   totalKcal: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '900',
     color: COLORS.text,
   },
   kcalUnit: {
-    fontSize: 12,
+    fontSize: 11,
     color: COLORS.textMuted,
+    fontWeight: '600',
   },
   itemsList: {
     borderTopWidth: 1,
     borderTopColor: COLORS.surfaceBorder,
     paddingTop: SPACING.xs,
+    marginTop: SPACING.xs,
     marginBottom: SPACING.xs,
   },
   itemRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: SPACING.sm,
+    paddingVertical: SPACING.xs + 2,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.03)',
   },
@@ -173,8 +190,8 @@ const styles = StyleSheet.create({
     paddingRight: SPACING.sm,
   },
   itemName: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 13,
+    fontWeight: '700',
     color: COLORS.text,
     marginBottom: 2,
   },
@@ -187,20 +204,20 @@ const styles = StyleSheet.create({
   itemQuantity: {
     fontSize: 11,
     color: COLORS.textSecondary,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   metaDot: {
-    fontSize: 11,
+    fontSize: 10,
     color: COLORS.textMuted,
   },
   itemKcal: {
     fontSize: 11,
     color: COLORS.text,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   macroPill: {
     fontSize: 10,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   deleteBtn: {
     padding: SPACING.xs,
@@ -211,7 +228,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    paddingVertical: SPACING.sm,
+    paddingVertical: 9,
     backgroundColor: COLORS.surfaceLight,
     borderRadius: RADIUS.md,
     marginTop: SPACING.xs,
@@ -219,9 +236,9 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.05)',
   },
   addBtnText: {
-    fontSize: 13,
-    fontWeight: '600',
+    fontSize: 12,
+    fontWeight: '700',
     color: COLORS.primary,
+    letterSpacing: 0.3,
   },
 });
-

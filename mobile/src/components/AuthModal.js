@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS } from '../constants/theme';
 import { api } from '../api/client';
 import { storage } from '../utils/storage';
+import MuscleLogo from './MuscleLogo';
 
 export default function AuthModal({ visible, onAuthSuccess }) {
   const [mode, setMode] = useState('login'); // 'login' | 'register'
@@ -124,12 +125,10 @@ export default function AuthModal({ visible, onAuthSuccess }) {
         <View style={styles.cardContainer}>
           {/* Header & Logo */}
           <View style={styles.logoRow}>
-            <View style={styles.logoBadge}>
-              <Ionicons name="flame" size={24} color={COLORS.primary} />
-            </View>
-            <Text style={styles.appTitle}>Calorie Calculator</Text>
+            <MuscleLogo size={56} iconSize={30} style={{ marginBottom: SPACING.sm }} />
+            <Text style={styles.appTitle}>CalCalc</Text>
             <Text style={styles.appSubtitle}>
-              Clean, private nutrition tracking with no ads or tracking
+              Elite Body Fuel & Nutrition Engine • Zero Clutter
             </Text>
           </View>
 

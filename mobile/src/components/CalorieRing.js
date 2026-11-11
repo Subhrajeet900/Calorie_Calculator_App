@@ -12,55 +12,68 @@ export default function CalorieRing({
   const percentage = Math.min(100, Math.round((consumed / safeTarget) * 100));
   const isOver = consumed > target;
 
-  const getStatusText = () => {
-    if (consumed === 0) return 'Log your first meal of the day';
-    if (isOver) {
-      const overBy = Math.round(consumed - target);
-      return `${overBy} kcal over daily budget`;
+  const getStatusBadge = () => {
+    if (consumed === 0) {
+      return {
+        label: 'READY TO FUEL',
+        icon: 'flash-outline',
+        color: COLORS.primary,
+        bg: COLORS.primaryAlpha,
+      };
     }
-    return `${Math.round(remaining)} kcal remaining today`;
+    if (isOver) {
+      const overKcal = Math.round(consumed - target);
+      return {
+        label: `+${overKcal} KCAL OVER BUDGET`,
+        icon: 'alert-circle',
+        color: COLORS.danger,
+        bg: COLORS.dangerAlpha,
+      };
+    }
+    if (percentage >= 85) {
+      return {
+        label: 'TARGET LOCKED IN',
+        icon: 'checkmark-circle',
+        color: COLORS.gold,
+        bg: 'rgba(251, 191, 36, 0.15)',
+      };
+    }
+    return {
+      label: 'OPTIMAL FUEL ZONE',
+      icon: 'flame',
+      color: COLORS.primary,
+      bg: COLORS.primaryAlpha,
+    };
   };
+
+  const status = getStatusBadge();
 
   return (
     <View style={styles.card}>
+      {/* Top Header Badge */}
       <View style={styles.topRow}>
-        <View style={styles.titleBadge}>
-          <Ionicons name="flash" size={14} color={COLORS.primary} />
-          <Text style={styles.titleText}>DAILY CALORIE TARGET</Text>
+        <View style={[styles.statusBadge, { backgroundColor: status.bg }]}>
+          <Ionicons name={status.icon} size={12} color={status.color} />
+          <Text style={[styles.statusBadgeText, { color: status.color }]}>
+            {status.label}
+          </Text>
         </View>
+
         <Text style={[styles.percentageText, isOver && styles.percentageOver]}>
           {percentage}%
         </Text>
       </View>
 
-      {/* Main Numbers Row */}
-      <View style={styles.numbersRow}>
-        <View style={styles.statBox}>
-          <Text style={styles.statLabel}>Consumed</Text>
-          <Text style={styles.statValueConsumed}>{Math.round(consumed)}</Text>
-          <Text style={styles.statUnit}>kcal</Text>
-        </View>
-
-        <View style={styles.divider} />
-
-        <View style={styles.statBox}>
-          <Text style={styles.statLabel}>Target</Text>
-          <Text style={styles.statValueTarget}>{Math.round(target)}</Text>
-          <Text style={styles.statUnit}>kcal</Text>
-        </View>
-
-        <View style={styles.divider} />
-
-        <View style={styles.statBox}>
-          <Text style={styles.statLabel}>{isOver ? 'Over by' : 'Remaining'}</Text>
-          <Text style={[styles.statValueRemaining, isOver && styles.statValueOver]}>
-            {Math.abs(Math.round(remaining))}
-          </Text>
-          <Text style={styles.statUnit}>kcal</Text>
-        </View>
+      {/* Hero Remaining Display */}
+      <View style={styles.heroCenter}>
+        <Text style={styles.heroSub}>REMAINING FUEL</Text>
+        <Text style={[styles.heroNumber, isOver && styles.heroNumberOver]}>
+          {isOver ? `-${Math.round(consumed - target)}` : Math.round(remaining)}
+        </Text>
+        <Text style={styles.heroUnit}>KCAL TO GO TODAY</Text>
       </View>
 
-      {/* Modern Progress Bar */}
+      {/* Progress Track with Glow */}
       <View style={styles.progressBarTrack}>
         <View
           style={[
@@ -71,16 +84,36 @@ export default function CalorieRing({
         />
       </View>
 
-      {/* Status Bar */}
-      <View style={styles.statusRow}>
-        <Ionicons
-          name={isOver ? 'alert-circle' : 'checkmark-circle'}
-          size={14}
-          color={isOver ? COLORS.danger : COLORS.primary}
-        />
-        <Text style={[styles.statusText, isOver && styles.statusTextOver]}>
-          {getStatusText()}
-        </Text>
+      {/* Bottom Numbers Row */}
+      <View style={styles.numbersRow}>
+        <View style={styles.statBox}>
+          <Text style={styles.statLabel}>CONSUMED</Text>
+          <Text style={styles.statValue}>{Math.round(consumed)}</Text>
+          <Text style={styles.statUnit}>kcal</Text>
+        </View>
+
+        <View style={styles.statDivider} />
+
+        <View style={styles.statBox}>
+          <Text style={styles.statLabel}>DAILY TARGET</Text>
+          <Text style={styles.statValueMuted}>{Math.round(target)}</Text>
+          <Text style={styles.statUnit}>kcal</Text>
+        </View>
+
+        <View style={styles.statDivider} />
+
+        <View style={styles.statBox}>
+          <Text style={styles.statLabel}>STATUS</Text>
+          <Text
+            style={[
+              styles.statValue,
+              { color: isOver ? COLORS.danger : COLORS.primary },
+            ]}
+          >
+            {isOver ? 'Exceeded' : 'On Track'}
+          </Text>
+          <Text style={styles.statUnit}>{isOver ? 'Adjust Dinner' : 'Paced Well'}</Text>
+        </View>
       </View>
     </View>
   );
@@ -95,6 +128,11 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
     borderWidth: 1,
     borderColor: COLORS.surfaceBorder,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 6,
   },
   topRow: {
     flexDirection: 'row',
@@ -102,74 +140,61 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: SPACING.md,
   },
-  titleBadge: {
+  statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: RADIUS.full,
   },
-  titleText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: COLORS.textMuted,
+  statusBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
     letterSpacing: 0.8,
   },
   percentageText: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: '800',
     color: COLORS.primary,
   },
   percentageOver: {
     color: COLORS.danger,
   },
-  numbersRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  heroCenter: {
     alignItems: 'center',
-    marginBottom: SPACING.lg,
+    paddingVertical: SPACING.xs,
+    marginBottom: SPACING.md,
   },
-  statBox: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  statLabel: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
+  heroSub: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.textMuted,
+    letterSpacing: 1.5,
     marginBottom: 4,
   },
-  statValueConsumed: {
-    fontSize: 26,
-    fontWeight: '800',
+  heroNumber: {
+    fontSize: 48,
+    fontWeight: '900',
     color: COLORS.text,
+    letterSpacing: -1,
   },
-  statValueTarget: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: COLORS.textSecondary,
-  },
-  statValueRemaining: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: COLORS.primary,
-  },
-  statValueOver: {
+  heroNumberOver: {
     color: COLORS.danger,
   },
-  statUnit: {
+  heroUnit: {
     fontSize: 11,
-    color: COLORS.textMuted,
+    fontWeight: '800',
+    color: COLORS.primary,
+    letterSpacing: 1.2,
     marginTop: 2,
   },
-  divider: {
-    width: 1,
-    height: 36,
-    backgroundColor: COLORS.surfaceBorder,
-  },
   progressBarTrack: {
-    height: 8,
+    height: 9,
     borderRadius: RADIUS.full,
     backgroundColor: COLORS.surfaceLight,
     overflow: 'hidden',
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.lg,
   },
   progressBarFill: {
     height: '100%',
@@ -179,19 +204,43 @@ const styles = StyleSheet.create({
   progressBarOver: {
     backgroundColor: COLORS.danger,
   },
-  statusRow: {
+  numbersRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 6,
-    justifyContent: 'center',
+    paddingTop: SPACING.sm,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.surfaceBorder,
   },
-  statusText: {
-    fontSize: 12,
+  statBox: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  statLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: COLORS.textMuted,
+    letterSpacing: 0.8,
+    marginBottom: 4,
+  },
+  statValue: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: COLORS.text,
+  },
+  statValueMuted: {
+    fontSize: 18,
+    fontWeight: '700',
     color: COLORS.textSecondary,
-    fontWeight: '500',
   },
-  statusTextOver: {
-    color: COLORS.danger,
+  statUnit: {
+    fontSize: 10,
+    color: COLORS.textMuted,
+    marginTop: 2,
+  },
+  statDivider: {
+    width: 1,
+    height: 32,
+    backgroundColor: COLORS.surfaceBorder,
   },
 });
-

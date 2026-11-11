@@ -18,6 +18,7 @@ import {
   calculateAll,
 } from '../utils/calculator';
 import { api, setApiBaseUrl, getApiBaseUrl } from '../api/client';
+import MuscleLogo from './MuscleLogo';
 
 export default function ProfileModal({
   visible,
@@ -102,9 +103,12 @@ export default function ProfileModal({
         <View style={styles.sheetContainer}>
           {/* Header */}
           <View style={styles.sheetHeader}>
-            <View>
-              <Text style={styles.sheetTitle}>Profile & Goals</Text>
-              <Text style={styles.sheetSubtitle}>Mifflin-St Jeor Engine Setup</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <MuscleLogo size={36} iconSize={20} />
+              <View>
+                <Text style={styles.sheetTitle}>Profile & Fuel Goals</Text>
+                <Text style={styles.sheetSubtitle}>Mifflin-St Jeor Engine Setup</Text>
+              </View>
             </View>
             <TouchableOpacity style={styles.closeBtn} onPress={onClose} activeOpacity={0.7}>
               <Ionicons name="close" size={20} color={COLORS.textSecondary} />

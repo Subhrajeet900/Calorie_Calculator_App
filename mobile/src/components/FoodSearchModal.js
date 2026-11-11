@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS } from '../constants/theme';
 import { api } from '../api/client';
 import { calculateItemNutrition } from '../utils/calculator';
+import MuscleLogo from './MuscleLogo';
 
 const CATEGORIES = [
   'All',
@@ -170,11 +171,14 @@ export default function FoodSearchModal({
         <View style={styles.sheetContainer}>
           {/* Sheet Header */}
           <View style={styles.sheetHeader}>
-            <View>
-              <Text style={styles.sheetTitle}>Add Food</Text>
-              <Text style={styles.sheetSubtitle}>
-                Logging to {mealType.charAt(0).toUpperCase() + mealType.slice(1)} • {selectedDate}
-              </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <MuscleLogo size={36} iconSize={20} />
+              <View>
+                <Text style={styles.sheetTitle}>Fuel Selection</Text>
+                <Text style={styles.sheetSubtitle}>
+                  Logging to {mealType.charAt(0).toUpperCase() + mealType.slice(1)} • {selectedDate}
+                </Text>
+              </View>
             </View>
 
             <TouchableOpacity style={styles.closeBtn} onPress={onClose} activeOpacity={0.7}>
