@@ -16,20 +16,24 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS } from '../constants/theme';
 import { api } from '../api/client';
 import { calculateItemNutrition } from '../utils/calculator';
+import { getServingMeta } from '../constants/defaultFoods';
 import MuscleLogo from './MuscleLogo';
 
 const CATEGORIES = [
   'All',
+  'Eggs & Dairy',
+  'Home Meals',
+  'Vegetables',
+  'Grains & Breads',
   'Meat & Poultry',
   'Seafood',
-  'Eggs & Dairy',
-  'Grains & Breads',
-  'Vegetables',
   'Fruits',
   'Nuts & Seeds',
   'Legumes',
-  'Supplements',
+  'Fats & Oils',
+  'Beverages',
   'Snacks',
+  'Supplements',
 ];
 
 export default function FoodSearchModal({
@@ -47,6 +51,8 @@ export default function FoodSearchModal({
 
   // Selected food for logging
   const [selectedFood, setSelectedFood] = useState(null);
+  const [inputMode, setInputMode] = useState('grams'); // 'serving' | 'grams'
+  const [servingCount, setServingCount] = useState('1');
   const [quantity, setQuantity] = useState('100');
   const [mealType, setMealType] = useState(initialMealType);
   const [logging, setLogging] = useState(false);
@@ -92,8 +98,41 @@ export default function FoodSearchModal({
   };
 
   const handleSelectFood = (food) => {
+    const meta = getServingMeta(food);
     setSelectedFood(food);
-    setQuantity(String(food.serving_size || 100));
+    if (meta.hasCountUnit) {
+      setInputMode('serving');
+      setServingCount('1');
+      setQuantity(String(meta.servingSize));
+    } else {
+      setInputMode('grams');
+      setServingCount('1');
+      setQuantity(String(food.serving_size || 100));
+    }
+  };
+
+  const handleModeSwitch = (mode) => {
+    if (!selectedFood || mode === inputMode) return;
+    const meta = getServingMeta(selectedFood);
+    if (mode === 'serving' && meta.hasCountUnit) {
+      const grams = Number(quantity) || meta.servingSize;
+      const count = Math.max(0.5, Math.round((grams / meta.servingSize) * 10) / 10);
+      setServingCount(String(count));
+      setInputMode('serving');
+    } else {
+      const grams = Math.max(
+        1,
+        Math.round((Number(servingCount) || 1) * (meta.servingSize || 100))
+      );
+      setQuantity(String(grams));
+      setInputMode('grams');
+    }
+  };
+
+  const handleStepServing = (delta) => {
+    const current = Number(servingCount) || 0;
+    const next = Math.max(0.5, Math.round((current + delta) * 10) / 10);
+    setServingCount(String(next));
   };
 
   const handleQuickAddQty = (delta) => {
@@ -102,17 +141,37 @@ export default function FoodSearchModal({
     setQuantity(String(next));
   };
 
+  const selectedMeta = selectedFood
+    ? getServingMeta(selectedFood)
+    : { hasCountUnit: false, unitLabel: 'g', servingSize: 100 };
+
+  const effectiveGrams = selectedFood
+    ? inputMode === 'serving' && selectedMeta.hasCountUnit
+      ? Math.max(1, Math.round((Number(servingCount) || 0) * selectedMeta.servingSize * 10) / 10)
+      : Math.max(0, Number(quantity) || 0)
+    : 0;
+
+  const unitLabelPlural =
+    Number(servingCount) === 1 || selectedMeta.unitLabel.endsWith('s')
+      ? selectedMeta.unitLabel
+      : `${selectedMeta.unitLabel}s`;
+
   const handleConfirmLog = async () => {
-    if (!selectedFood) return;
-    const qty = Number(quantity);
-    if (!qty || qty <= 0) return;
+    if (!selectedFood || !effectiveGrams || effectiveGrams <= 0) return;
 
     setLogging(true);
     try {
       await api.logMeal({
         meal_type: mealType,
         date: selectedDate,
-        items: [{ food_id: selectedFood.id, quantity: qty }],
+        items: [
+          {
+            food_id: selectedFood.id,
+            food_name: selectedFood.name,
+            food: selectedFood,
+            quantity: effectiveGrams,
+          },
+        ],
       });
       if (onFoodLogged) onFoodLogged();
       onClose();
@@ -131,7 +190,7 @@ export default function FoodSearchModal({
       const newFood = await api.createCustomFood({
         name: customName.trim(),
         category: customCategory,
-        serving_unit: 'g',
+        serving_unit: '100g',
         serving_size: 100,
         calories_per_100g: Number(customCalories) || 0,
         protein_per_100g: Number(customProtein) || 0,
@@ -140,8 +199,7 @@ export default function FoodSearchModal({
       });
 
       // Automatically select and switch to log
-      setSelectedFood(newFood);
-      setQuantity('100');
+      handleSelectFood(newFood);
       setActiveTab('search');
       setSearchQuery('');
       fetchFoods('', 'All');
@@ -154,7 +212,7 @@ export default function FoodSearchModal({
 
   // Preview nutrition for selected food
   const preview = selectedFood
-    ? calculateItemNutrition(selectedFood, Number(quantity) || 0)
+    ? calculateItemNutrition(selectedFood, effectiveGrams)
     : null;
 
   return (
@@ -270,6 +328,11 @@ export default function FoodSearchModal({
                   contentContainerStyle={styles.foodsListContent}
                   renderItem={({ item }) => {
                     const isSelected = selectedFood?.id === item.id;
+                    const itemMeta = getServingMeta(item);
+                    const perServing = itemMeta.hasCountUnit
+                      ? calculateItemNutrition(item, itemMeta.servingSize)
+                      : null;
+
                     return (
                       <TouchableOpacity
                         style={[styles.foodCard, isSelected && styles.foodCardSelected]}
@@ -278,15 +341,24 @@ export default function FoodSearchModal({
                       >
                         <View style={styles.foodInfo}>
                           <Text style={styles.foodName}>{item.name}</Text>
-                          <Text style={styles.foodCategory}>{item.category}</Text>
+                          <Text style={styles.foodCategory}>
+                            {item.category}
+                            {itemMeta.hasCountUnit
+                              ? ` • 1 ${itemMeta.unitLabel} = ${itemMeta.servingSize}g`
+                              : ' • per 100g'}
+                          </Text>
                         </View>
 
                         <View style={styles.foodNutrients}>
                           <Text style={styles.foodKcal}>
-                            {Math.round(item.calories_per_100g)} kcal
+                            {perServing
+                              ? `${Math.round(perServing.calories)} kcal/${itemMeta.unitLabel}`
+                              : `${Math.round(item.calories_per_100g)} kcal`}
                           </Text>
                           <Text style={styles.foodMacros}>
-                            P: {Math.round(item.protein_per_100g)} • C: {Math.round(item.carbs_per_100g)} • F: {Math.round(item.fat_per_100g)}
+                            P: {perServing ? perServing.protein : Math.round(item.protein_per_100g)} • C:{' '}
+                            {perServing ? perServing.carbs : Math.round(item.carbs_per_100g)} • F:{' '}
+                            {perServing ? perServing.fat : Math.round(item.fat_per_100g)}
                           </Text>
                         </View>
                       </TouchableOpacity>
@@ -305,56 +377,147 @@ export default function FoodSearchModal({
               {/* Bottom Drawer for Selected Food */}
               {selectedFood && (
                 <View style={styles.drawer}>
+                  {/* Mode Switcher when food supports Count/Pieces */}
+                  {selectedMeta.hasCountUnit && (
+                    <View style={styles.modeToggleRow}>
+                      <TouchableOpacity
+                        style={[
+                          styles.modePill,
+                          inputMode === 'serving' && styles.modePillActive,
+                        ]}
+                        onPress={() => handleModeSwitch('serving')}
+                      >
+                        <Text
+                          style={[
+                            styles.modePillText,
+                            inputMode === 'serving' && styles.modePillTextActive,
+                          ]}
+                        >
+                          By Count ({selectedMeta.unitLabel})
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[
+                          styles.modePill,
+                          inputMode === 'grams' && styles.modePillActive,
+                        ]}
+                        onPress={() => handleModeSwitch('grams')}
+                      >
+                        <Text
+                          style={[
+                            styles.modePillText,
+                            inputMode === 'grams' && styles.modePillTextActive,
+                          ]}
+                        >
+                          Grams (g)
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+
                   <View style={styles.drawerTop}>
                     <View style={styles.drawerFoodNameBox}>
                       <Text style={styles.drawerFoodName} numberOfLines={1}>
                         {selectedFood.name}
                       </Text>
                       <Text style={styles.drawerFoodSub}>
-                        {preview?.calories} kcal for {quantity}g
+                        {inputMode === 'serving' && selectedMeta.hasCountUnit
+                          ? `${preview?.calories || 0} kcal for ${servingCount || 0} ${unitLabelPlural} (${effectiveGrams}g)`
+                          : `${preview?.calories || 0} kcal for ${effectiveGrams}g`}
                       </Text>
                     </View>
 
-                    <View style={styles.qtyInputBox}>
-                      <TextInput
-                        style={styles.qtyInput}
-                        keyboardType="numeric"
-                        value={quantity}
-                        onChangeText={setQuantity}
-                        maxLength={5}
-                      />
-                      <Text style={styles.qtyUnit}>grams</Text>
-                    </View>
+                    {inputMode === 'serving' && selectedMeta.hasCountUnit ? (
+                      <View style={styles.stepperBox}>
+                        <TouchableOpacity
+                          style={styles.stepperBtn}
+                          onPress={() => handleStepServing(-1)}
+                        >
+                          <Ionicons name="remove" size={16} color={COLORS.text} />
+                        </TouchableOpacity>
+                        <TextInput
+                          style={styles.stepperInput}
+                          keyboardType="decimal-pad"
+                          value={servingCount}
+                          onChangeText={setServingCount}
+                          maxLength={4}
+                        />
+                        <TouchableOpacity
+                          style={styles.stepperBtn}
+                          onPress={() => handleStepServing(1)}
+                        >
+                          <Ionicons name="add" size={16} color={COLORS.text} />
+                        </TouchableOpacity>
+                      </View>
+                    ) : (
+                      <View style={styles.qtyInputBox}>
+                        <TextInput
+                          style={styles.qtyInput}
+                          keyboardType="numeric"
+                          value={quantity}
+                          onChangeText={setQuantity}
+                          maxLength={5}
+                        />
+                        <Text style={styles.qtyUnit}>grams</Text>
+                      </View>
+                    )}
                   </View>
 
                   {/* Quick Quantity Chips */}
-                  <View style={styles.quickChipsRow}>
-                    {[+25, +50, +100].map((delta) => (
-                      <TouchableOpacity
-                        key={delta}
-                        style={styles.quickChip}
-                        onPress={() => handleQuickAddQty(delta)}
-                      >
-                        <Text style={styles.quickChipText}>+{delta}g</Text>
-                      </TouchableOpacity>
-                    ))}
-                    {['50', '100', '150', '200'].map((preset) => (
-                      <TouchableOpacity
-                        key={preset}
-                        style={[styles.quickChip, quantity === preset && styles.quickChipActive]}
-                        onPress={() => setQuantity(preset)}
-                      >
-                        <Text
+                  {inputMode === 'serving' && selectedMeta.hasCountUnit ? (
+                    <View style={styles.quickChipsRow}>
+                      {['1', '2', '3', '4', '5', '6'].map((cnt) => (
+                        <TouchableOpacity
+                          key={cnt}
                           style={[
-                            styles.quickChipText,
-                            quantity === preset && styles.quickChipTextActive,
+                            styles.quickChip,
+                            servingCount === cnt && styles.quickChipActive,
                           ]}
+                          onPress={() => setServingCount(cnt)}
                         >
-                          {preset}g
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
+                          <Text
+                            style={[
+                              styles.quickChipText,
+                              servingCount === cnt && styles.quickChipTextActive,
+                            ]}
+                          >
+                            {cnt}{' '}
+                            {Number(cnt) === 1 || selectedMeta.unitLabel.endsWith('s')
+                              ? selectedMeta.unitLabel
+                              : `${selectedMeta.unitLabel}s`}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  ) : (
+                    <View style={styles.quickChipsRow}>
+                      {[+25, +50, +100].map((delta) => (
+                        <TouchableOpacity
+                          key={delta}
+                          style={styles.quickChip}
+                          onPress={() => handleQuickAddQty(delta)}
+                        >
+                          <Text style={styles.quickChipText}>+{delta}g</Text>
+                        </TouchableOpacity>
+                      ))}
+                      {['50', '100', '150', '200'].map((preset) => (
+                        <TouchableOpacity
+                          key={preset}
+                          style={[styles.quickChip, quantity === preset && styles.quickChipActive]}
+                          onPress={() => setQuantity(preset)}
+                        >
+                          <Text
+                            style={[
+                              styles.quickChipText,
+                              quantity === preset && styles.quickChipTextActive,
+                            ]}
+                          >
+                            {preset}g
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  )}
 
                   {/* Live Macro Preview Bar */}
                   {preview && (
@@ -407,7 +570,7 @@ export default function FoodSearchModal({
                   <TouchableOpacity
                     style={styles.logBtn}
                     onPress={handleConfirmLog}
-                    disabled={logging}
+                    disabled={logging || !effectiveGrams}
                     activeOpacity={0.8}
                   >
                     {logging ? (
@@ -416,7 +579,9 @@ export default function FoodSearchModal({
                       <>
                         <Ionicons name="checkmark-circle" size={18} color="#FFFFFF" />
                         <Text style={styles.logBtnText}>
-                          Add {quantity}g to {mealType.charAt(0).toUpperCase() + mealType.slice(1)}
+                          {inputMode === 'serving' && selectedMeta.hasCountUnit
+                            ? `Add ${servingCount || 0} ${unitLabelPlural} to ${mealType.charAt(0).toUpperCase() + mealType.slice(1)}`
+                            : `Add ${effectiveGrams}g to ${mealType.charAt(0).toUpperCase() + mealType.slice(1)}`}
                         </Text>
                       </>
                     )}
@@ -697,9 +862,66 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surfaceLight,
     borderTopLeftRadius: RADIUS.xl,
     borderTopRightRadius: RADIUS.xl,
-    padding: SPACING.lg,
+    padding: SPACING.md,
+    paddingHorizontal: SPACING.lg,
     borderWidth: 1,
     borderColor: COLORS.surfaceBorder,
+  },
+  modeToggleRow: {
+    flexDirection: 'row',
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.md,
+    padding: 3,
+    marginBottom: SPACING.sm,
+    borderWidth: 1,
+    borderColor: COLORS.surfaceBorder,
+    gap: 4,
+  },
+  modePill: {
+    flex: 1,
+    paddingVertical: 6,
+    borderRadius: RADIUS.sm,
+    alignItems: 'center',
+  },
+  modePillActive: {
+    backgroundColor: COLORS.primaryAlpha,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+  },
+  modePillText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: COLORS.textMuted,
+  },
+  modePillTextActive: {
+    color: COLORS.primary,
+    fontWeight: '700',
+  },
+  stepperBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: COLORS.surfaceBorder,
+    height: 40,
+    paddingHorizontal: 4,
+    gap: 4,
+  },
+  stepperBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: RADIUS.sm,
+    backgroundColor: COLORS.surfaceLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  stepperInput: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.text,
+    width: 40,
+    textAlign: 'center',
   },
   drawerTop: {
     flexDirection: 'row',

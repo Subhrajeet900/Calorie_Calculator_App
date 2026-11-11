@@ -4,17 +4,23 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS } from '../constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function WaterTracker({ date }) {
+export default function WaterTracker({ date, userEmail }) {
   const [waterMl, setWaterMl] = useState(0);
   const goalMl = 2500;
+  const scopedKey = userEmail
+    ? `@water_${String(userEmail).trim().toLowerCase()}_${date}`
+    : `@water_${date}`;
 
   useEffect(() => {
     loadWater();
-  }, [date]);
+  }, [date, userEmail]);
 
   const loadWater = async () => {
     try {
-      const saved = await AsyncStorage.getItem(`@water_${date}`);
+      let saved = await AsyncStorage.getItem(scopedKey);
+      if (saved === null && userEmail) {
+        saved = await AsyncStorage.getItem(`@water_${date}`);
+      }
       setWaterMl(saved ? Number(saved) : 0);
     } catch {
       setWaterMl(0);
@@ -25,7 +31,7 @@ export default function WaterTracker({ date }) {
     const next = Math.max(0, waterMl + delta);
     setWaterMl(next);
     try {
-      await AsyncStorage.setItem(`@water_${date}`, String(next));
+      await AsyncStorage.setItem(scopedKey, String(next));
     } catch {}
   };
 

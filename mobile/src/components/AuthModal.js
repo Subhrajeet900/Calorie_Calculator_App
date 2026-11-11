@@ -16,6 +16,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS } from '../constants/theme';
 import { api } from '../api/client';
 import { storage } from '../utils/storage';
+import { getLocalDateStr } from '../utils/calculator';
+import { DEFAULT_FOODS } from '../constants/defaultFoods';
 import MuscleLogo from './MuscleLogo';
 
 export default function AuthModal({ visible, onAuthSuccess }) {
@@ -32,22 +34,38 @@ export default function AuthModal({ visible, onAuthSuccess }) {
   const [goal, setGoal] = useState('maintain');
 
   const [loading, setLoading] = useState(false);
+  const [statusMsg, setStatusMsg] = useState('');
 
   const handleSubmit = async () => {
-    if (!email.trim() || !password) {
-      Alert.alert('Required', 'Please enter email and password');
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail || !password) {
+      Alert.alert('Required', 'Please enter your email address and password.');
+      return;
+    }
+    if (!cleanEmail.includes('@') || !cleanEmail.includes('.')) {
+      Alert.alert('Invalid Email', 'Please enter a valid email address.');
+      return;
+    }
+    if (mode === 'register' && password.length < 6) {
+      Alert.alert('Password Too Short', 'Password must be at least 6 characters.');
       return;
     }
 
     setLoading(true);
+    setStatusMsg('Signing in...');
+    const slowTimer = setTimeout(() => {
+      setStatusMsg('Waking cloud server (first load may take ~30-50s)...');
+    }, 3500);
+
     try {
       let res;
       if (mode === 'login') {
-        res = await api.login({ email: email.trim(), password });
+        res = await api.login({ email: cleanEmail, password });
       } else {
+        setStatusMsg('Creating account...');
         res = await api.register({
           name: name.trim() || 'User',
-          email: email.trim(),
+          email: cleanEmail,
           password,
           gender,
           age: Number(age) || 25,
@@ -67,9 +85,14 @@ export default function AuthModal({ visible, onAuthSuccess }) {
 
       onAuthSuccess(res.user);
     } catch (e) {
-      Alert.alert('Authentication Failed', e.message || 'Check your credentials and try again.');
+      Alert.alert(
+        'Authentication Failed',
+        e.message || 'Check your email & password and try again.'
+      );
     } finally {
+      clearTimeout(slowTimer);
       setLoading(false);
+      setStatusMsg('');
     }
   };
 
@@ -97,16 +120,21 @@ export default function AuthModal({ visible, onAuthSuccess }) {
       await storage.saveToken('mock-demo-token');
       await storage.saveUser(demoUser);
 
-      // Seed a couple of initial sample meals in demo mode
-      const today = new Date().toISOString().split('T')[0];
-      await api.logMeal({
-        meal_type: 'breakfast',
-        date: today,
-        items: [
-          { food_id: 2, quantity: 100 }, // 2 eggs
-          { food_id: 3, quantity: 60 },  // oats
-        ],
-      });
+      // Seed a couple of initial sample meals in demo mode only if empty
+      const today = getLocalDateStr();
+      const existingMeals = await storage.getMealsForDate(demoUser.email, today);
+      if (existingMeals.length === 0) {
+        const wholeEgg = DEFAULT_FOODS.find((f) => f.name === 'Whole Egg');
+        const oats = DEFAULT_FOODS.find((f) => f.name.includes('Oatmeal'));
+        await api.logMeal({
+          meal_type: 'breakfast',
+          date: today,
+          items: [
+            { food_id: wholeEgg?.id || 13, food_name: 'Whole Egg', food: wholeEgg, quantity: 100 },
+            { food_id: oats?.id || 32, food_name: 'Oatmeal / Rolled Oats', food: oats, quantity: 60 },
+          ],
+        });
+      }
 
       onAuthSuccess(demoUser);
     } catch (e) {
@@ -184,7 +212,7 @@ export default function AuthModal({ visible, onAuthSuccess }) {
               <Text style={styles.label}>Password</Text>
               <TextInput
                 style={styles.input}
-                placeholder="••••••••"
+                placeholder={mode === 'register' ? 'Minimum 6 characters' : '••••••••'}
                 placeholderTextColor={COLORS.textMuted}
                 value={password}
                 onChangeText={setPassword}
@@ -265,13 +293,22 @@ export default function AuthModal({ visible, onAuthSuccess }) {
               activeOpacity={0.8}
             >
               {loading ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                  <Text style={styles.submitBtnText}>Please wait...</Text>
+                </View>
               ) : (
                 <Text style={styles.submitBtnText}>
                   {mode === 'login' ? 'Sign In' : 'Create & Calculate'}
                 </Text>
               )}
             </TouchableOpacity>
+
+            {!!statusMsg && (
+              <Text style={{ fontSize: 11, color: COLORS.textSecondary, textAlign: 'center', marginTop: 8 }}>
+                {statusMsg}
+              </Text>
+            )}
 
             {/* Quick Demo Mode */}
             <View style={styles.dividerRow}>

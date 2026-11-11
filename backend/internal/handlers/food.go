@@ -52,7 +52,7 @@ func (h *FoodHandler) SearchFoods(c *gin.Context) {
 		tx = tx.Where("category = ?", category)
 	}
 
-	if err := tx.Order("name ASC").Limit(100).Find(&foods).Error; err != nil {
+	if err := tx.Order("name ASC").Limit(300).Find(&foods).Error; err != nil {
 		utils.JSONInternalError(c, "Failed to fetch foods")
 		return
 	}

@@ -12,6 +12,7 @@ import {
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS, SPACING } from './src/constants/theme';
 import { storage } from './src/utils/storage';
+import { getLocalDateStr } from './src/utils/calculator';
 import { api } from './src/api/client';
 
 // Components
@@ -35,9 +36,7 @@ export default function App() {
 
 function MainApp() {
   const [user, setUser] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split('T')[0]
-  );
+  const [selectedDate, setSelectedDate] = useState(getLocalDateStr());
   const [daySummary, setDaySummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -49,9 +48,10 @@ function MainApp() {
   const [weeklyVisible, setWeeklyVisible] = useState(false);
   const [profileVisible, setProfileVisible] = useState(false);
 
-  // Initial load
+  // Initial load & cloud wakeup
   useEffect(() => {
     checkAuth();
+    api.wakeServer();
   }, []);
 
   const checkAuth = async () => {
@@ -62,20 +62,26 @@ function MainApp() {
 
       if (token && savedUser) {
         setUser(savedUser);
+        // Load locally saved meals instantaneously before network sync
+        const cached = await api.getCachedMealsForDay(selectedDate);
+        setDaySummary(cached);
+        setLoading(false);
         loadDayData(selectedDate);
       } else {
         setAuthVisible(true);
+        setLoading(false);
       }
     } catch (e) {
       console.warn('CheckAuth error:', e);
       setAuthVisible(true);
-    } finally {
       setLoading(false);
     }
   };
 
   const loadDayData = async (date) => {
     try {
+      const cached = await api.getCachedMealsForDay(date);
+      setDaySummary(cached);
       const summary = await api.getMealsForDay(date);
       setDaySummary(summary);
     } catch (e) {
@@ -91,9 +97,9 @@ function MainApp() {
 
   // Date Navigators
   const changeDate = (days) => {
-    const current = new Date(selectedDate + 'T00:00:00');
+    const current = new Date(selectedDate + 'T12:00:00');
     current.setDate(current.getDate() + days);
-    const newDateStr = current.toISOString().split('T')[0];
+    const newDateStr = getLocalDateStr(current);
     setSelectedDate(newDateStr);
     loadDayData(newDateStr);
   };
@@ -101,7 +107,7 @@ function MainApp() {
   const handlePrevDate = () => changeDate(-1);
   const handleNextDate = () => changeDate(1);
   const handleToday = () => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalDateStr();
     setSelectedDate(today);
     loadDayData(today);
   };
@@ -135,6 +141,7 @@ function MainApp() {
   const handleLogout = async () => {
     await storage.clearAll();
     setUser(null);
+    setDaySummary(null);
     setProfileVisible(false);
     setAuthVisible(true);
   };
@@ -198,7 +205,7 @@ function MainApp() {
           />
 
           {/* Daily Hydration Cockpit */}
-          <WaterTracker date={selectedDate} />
+          <WaterTracker date={selectedDate} userEmail={user?.email} />
 
           {/* 4 Fuel Sections */}
           <View style={styles.mealsSection}>

@@ -18,6 +18,14 @@ export const GOALS = [
   { id: 'gain', label: 'Gain Muscle', delta: 300, desc: '+300 kcal / day (lean mass growth)' },
 ];
 
+export function getLocalDateStr(dateInput = new Date()) {
+  const d = dateInput instanceof Date ? dateInput : new Date(dateInput);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export function calculateBMR(gender, weightKg, heightCm, age) {
   const base = 10 * weightKg + 6.25 * heightCm - 5 * age;
   return gender?.toLowerCase() === 'female' ? base - 161 : base + 5;
@@ -49,29 +57,41 @@ export function calculateMacros(targetKcal) {
   };
 }
 
-export function calculateAll({ age, gender, height, weight, activityLevel, goal }) {
-  const bmr = calculateBMR(gender, Number(weight), Number(height), Number(age));
+export function calculateAll(params = {}) {
+  const age = Number(params.age) || 25;
+  const gender = params.gender || 'male';
+  const height = Number(params.height) || 175;
+  const weight = Number(params.weight) || 70;
+  const activityLevel = params.activityLevel || params.activity_level || 'moderate';
+  const goal = params.goal || 'maintain';
+
+  const bmr = calculateBMR(gender, weight, height, age);
   const tdee = calculateTDEE(bmr, activityLevel);
   const targetKcal = adjustForGoal(tdee, goal);
   const macros = calculateMacros(targetKcal);
 
+  const roundedKcal = Math.round(targetKcal);
+
   return {
     bmr: Math.round(bmr),
     tdee: Math.round(tdee),
-    targetCalories: Math.round(targetKcal),
+    targetCalories: roundedKcal,
     targetProtein: macros.protein,
     targetCarbs: macros.carbs,
     targetFat: macros.fat,
+    target_calories: roundedKcal,
+    target_protein: macros.protein,
+    target_carbs: macros.carbs,
+    target_fat: macros.fat,
   };
 }
 
 export function calculateItemNutrition(food, quantityGrams) {
   const ratio = (Number(quantityGrams) || 0) / 100;
   return {
-    calories: Math.round((food.calories_per_100g || 0) * ratio * 10) / 10,
-    protein: Math.round((food.protein_per_100g || 0) * ratio * 10) / 10,
-    carbs: Math.round((food.carbs_per_100g || 0) * ratio * 10) / 10,
-    fat: Math.round((food.fat_per_100g || 0) * ratio * 10) / 10,
+    calories: Math.round((food?.calories_per_100g || 0) * ratio * 10) / 10,
+    protein: Math.round((food?.protein_per_100g || 0) * ratio * 10) / 10,
+    carbs: Math.round((food?.carbs_per_100g || 0) * ratio * 10) / 10,
+    fat: Math.round((food?.fat_per_100g || 0) * ratio * 10) / 10,
   };
 }
-

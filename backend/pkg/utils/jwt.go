@@ -14,9 +14,9 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-// GenerateToken generates a signed JWT token valid for 30 days
+// GenerateToken generates a long-lived signed JWT token (10 years) so sessions persist until logout
 func GenerateToken(userID uint, email, secret string) (string, error) {
-	expirationTime := time.Now().Add(30 * 24 * time.Hour)
+	expirationTime := time.Now().Add(10 * 365 * 24 * time.Hour)
 	claims := &Claims{
 		UserID: userID,
 		Email:  email,

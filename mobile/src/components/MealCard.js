@@ -2,6 +2,24 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS } from '../constants/theme';
+import { getServingMeta } from '../constants/defaultFoods';
+
+function formatItemQuantity(item) {
+  const qty = Number(item?.quantity) || 0;
+  const meta = getServingMeta(item?.food);
+  if (meta.hasCountUnit && meta.servingSize > 0) {
+    const count = qty / meta.servingSize;
+    const roundedHalf = Math.round(count * 2) / 2;
+    if (roundedHalf > 0 && Math.abs(count - roundedHalf) < 0.08) {
+      const unitWord =
+        roundedHalf === 1 || meta.unitLabel.endsWith('s')
+          ? meta.unitLabel
+          : `${meta.unitLabel}s`;
+      return `${roundedHalf} ${unitWord} (${Math.round(qty)}g)`;
+    }
+  }
+  return `${Math.round(qty)}g`;
+}
 
 const MEAL_CONFIG = {
   breakfast: {
@@ -66,7 +84,7 @@ export default function MealCard({
                   {item.food?.name || 'Logged Food'}
                 </Text>
                 <View style={styles.itemMeta}>
-                  <Text style={styles.itemQuantity}>{Math.round(item.quantity)}g</Text>
+                  <Text style={styles.itemQuantity}>{formatItemQuantity(item)}</Text>
                   <Text style={styles.metaDot}>•</Text>
                   <Text style={styles.itemKcal}>{Math.round(item.calories)} kcal</Text>
                   <Text style={styles.metaDot}>•</Text>
