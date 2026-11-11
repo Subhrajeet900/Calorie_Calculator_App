@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
     marginBottom: SPACING.xl,
     borderWidth: 1,
-    borderColor: 'rgba(16, 185, 129, 0.2)',
+    borderColor: COLORS.surfaceBorderActive,
   },
   privacyContent: {
     flex: 1,

@@ -11,13 +11,14 @@
       "bundleIdentifier": "com.subhrajeet.caloriecalculator"
     },
     "android": {
+      "versionCode": 1,
+      "package": "com.subhrajeet.caloriecalculator",
       "adaptiveIcon": {
-        "backgroundColor": "#070B12",
+        "backgroundColor": "#05070B",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      },
-      "package": "com.subhrajeet.caloriecalculator"
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"

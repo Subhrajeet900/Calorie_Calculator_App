@@ -972,4 +972,25 @@ export const api = {
       average_fat: daysLogged > 0 ? Math.round((totalFat / avgDivisor) * 10) / 10 : 0,
     };
   },
+
+  async getConsistencyStats() {
+    const user = await storage.getUser();
+    const userEmail = user?.email || 'guest';
+    const allMeals = await storage.getAllMeals(userEmail);
+    const today = new Date();
+    const flags = [];
+    let activeDays = 0;
+
+    for (let i = 27; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const dStr = getLocalDateStr(d);
+      const dayMeals = allMeals[dStr] || [];
+      const hasLog = dayMeals.some((m) => (m.items || []).length > 0);
+      flags.push(hasLog);
+      if (hasLog) activeDays += 1;
+    }
+
+    return { activeDays, matrixFlags: flags };
+  },
 };

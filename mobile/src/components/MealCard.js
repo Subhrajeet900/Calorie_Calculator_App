@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(0, 245, 155, 0.2)',
+    borderColor: COLORS.surfaceBorderActive,
   },
   mealTitle: {
     fontSize: 15,

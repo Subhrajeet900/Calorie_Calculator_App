@@ -34,14 +34,14 @@ export default function CalorieRing({
       return {
         label: 'TARGET LOCKED IN',
         icon: 'checkmark-circle',
-        color: COLORS.gold,
-        bg: 'rgba(251, 191, 36, 0.15)',
+        color: COLORS.successLight,
+        bg: COLORS.successAlpha,
       };
     }
     return {
       label: 'OPTIMAL FUEL ZONE',
       icon: 'flame',
-      color: COLORS.primary,
+      color: COLORS.accent,
       bg: COLORS.primaryAlpha,
     };
   };
@@ -107,7 +107,7 @@ export default function CalorieRing({
           <Text
             style={[
               styles.statValue,
-              { color: isOver ? COLORS.danger : COLORS.primary },
+              { color: isOver ? COLORS.dangerLight : COLORS.accent },
             ]}
           >
             {isOver ? 'Exceeded' : 'On Track'}
@@ -155,11 +155,11 @@ const styles = StyleSheet.create({
   },
   percentageText: {
     fontSize: 14,
-    fontWeight: '800',
-    color: COLORS.primary,
+    fontWeight: '700',
+    color: COLORS.accent,
   },
   percentageOver: {
-    color: COLORS.danger,
+    color: COLORS.dangerLight,
   },
   heroCenter: {
     alignItems: 'center',
@@ -167,30 +167,30 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   heroSub: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: 10.5,
+    fontWeight: '600',
     color: COLORS.textMuted,
     letterSpacing: 1.5,
     marginBottom: 4,
   },
   heroNumber: {
     fontSize: 48,
-    fontWeight: '900',
+    fontWeight: '400',
     color: COLORS.text,
     letterSpacing: -1,
   },
   heroNumberOver: {
-    color: COLORS.danger,
+    color: COLORS.dangerLight,
   },
   heroUnit: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: COLORS.primary,
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: COLORS.accent,
     letterSpacing: 1.2,
     marginTop: 2,
   },
   progressBarTrack: {
-    height: 9,
+    height: 8,
     borderRadius: RADIUS.full,
     backgroundColor: COLORS.surfaceLight,
     overflow: 'hidden',
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
   progressBarFill: {
     height: '100%',
     borderRadius: RADIUS.full,
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.accent,
   },
   progressBarOver: {
     backgroundColor: COLORS.danger,

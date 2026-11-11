@@ -75,7 +75,7 @@ export default function WaterTracker({ date, userEmail }) {
             onPress={() => updateWater(250)}
             activeOpacity={0.7}
           >
-            <Ionicons name="add" size={16} color="#FFFFFF" />
+            <Ionicons name="add" size={16} color="#05070B" />
             <Text style={styles.btnAddText}>+250ml</Text>
           </TouchableOpacity>
         </View>
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
   btnAddText: {
     fontSize: 12,
     fontWeight: '800',
-    color: '#070B12',
+    color: '#05070B',
   },
   track: {
     height: 6,

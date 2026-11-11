@@ -1,29 +1,25 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS } from '../constants/theme';
-import MuscleLogo from './MuscleLogo';
+import { getLocalDateStr } from '../utils/calculator';
 
 export default function Header({
   date,
   onPrevDate,
   onNextDate,
   onToday,
-  onOpenWeekly,
+  onOpenWelcome,
   onOpenProfile,
   user,
 }) {
-  const isToday = () => {
-    const today = new Date().toISOString().split('T')[0];
-    return date === today;
-  };
+  const isToday = () => date === getLocalDateStr();
 
   const formatDateDisplay = () => {
     if (isToday()) return 'Today';
     try {
-      const d = new Date(date + 'T00:00:00');
+      const d = new Date(date + 'T12:00:00');
       return d.toLocaleDateString('en-US', {
-        weekday: 'short',
         month: 'short',
         day: 'numeric',
       });
@@ -32,195 +28,116 @@ export default function Header({
     }
   };
 
+  const initial = user?.name ? user.name.trim().charAt(0).toUpperCase() : null;
+
   return (
     <View style={styles.container}>
-      {/* Top row: Brand & Action Icons */}
-      <View style={styles.topRow}>
-        <View style={styles.brandRow}>
-          <MuscleLogo size={38} iconSize={22} />
-          <View style={styles.brandTextCol}>
-            <View style={styles.titleWithBadge}>
-              <Text style={styles.appName}>CalCalc</Text>
-              <View style={styles.proPill}>
-                <Text style={styles.proPillText}>PRO</Text>
-              </View>
-            </View>
-            <Text style={styles.appTagline}>ELITE BODY FUEL</Text>
-          </View>
-        </View>
+      {/* Left Circular Glass Button: CalCalc Emblem / Welcome Cover */}
+      <TouchableOpacity
+        style={styles.circleBtn}
+        onPress={onOpenWelcome}
+        activeOpacity={0.75}
+        accessibilityLabel="Open CalCalc Cover"
+      >
+        <MaterialCommunityIcons name="arm-flex" size={18} color={COLORS.accent} />
+      </TouchableOpacity>
 
-        <View style={styles.iconButtons}>
-          <TouchableOpacity
-            style={styles.iconBtn}
-            onPress={onOpenWeekly}
-            activeOpacity={0.7}
-            accessibilityLabel="Weekly Progress"
-          >
-            <Ionicons name="stats-chart" size={17} color={COLORS.primary} />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.iconBtn, styles.profileBtn]}
-            onPress={onOpenProfile}
-            activeOpacity={0.7}
-            accessibilityLabel="Profile & Targets"
-          >
-            <Ionicons name="person" size={17} color="#FFFFFF" />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Date Navigator Bar */}
-      <View style={styles.dateNavigator}>
+      {/* Center Obsidian Date Pill (< Today >) */}
+      <View style={styles.datePill}>
         <TouchableOpacity
-          style={styles.dateArrow}
+          style={styles.pillChevron}
           onPress={onPrevDate}
           activeOpacity={0.6}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 6 }}
         >
-          <Ionicons name="chevron-back" size={18} color={COLORS.textSecondary} />
+          <Ionicons name="chevron-back" size={15} color={COLORS.textSecondary} />
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.dateBadge}
+          style={styles.pillCenter}
           onPress={onToday}
-          activeOpacity={0.7}
+          activeOpacity={0.75}
         >
-          <Ionicons name="calendar-outline" size={14} color={COLORS.primary} />
           <Text style={styles.dateText}>{formatDateDisplay()}</Text>
-          {!isToday() && (
-            <View style={styles.todayIndicator}>
-              <Text style={styles.todayIndicatorText}>Reset</Text>
-            </View>
-          )}
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.dateArrow}
+          style={styles.pillChevron}
           onPress={onNextDate}
           activeOpacity={0.6}
+          hitSlop={{ top: 10, bottom: 10, left: 6, right: 10 }}
         >
-          <Ionicons name="chevron-forward" size={18} color={COLORS.textSecondary} />
+          <Ionicons name="chevron-forward" size={15} color={COLORS.textSecondary} />
         </TouchableOpacity>
       </View>
+
+      {/* Right Circular Glass Button: Profile & Targets */}
+      <TouchableOpacity
+        style={styles.circleBtn}
+        onPress={onOpenProfile}
+        activeOpacity={0.75}
+        accessibilityLabel="Profile and Goals"
+      >
+        {initial ? (
+          <Text style={styles.initialText}>{initial}</Text>
+        ) : (
+          <Ionicons name="person-outline" size={17} color={COLORS.text} />
+        )}
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.sm,
-    paddingBottom: SPACING.sm,
-    backgroundColor: COLORS.background,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.surfaceBorder,
+    paddingBottom: SPACING.xs,
+    backgroundColor: 'transparent',
   },
-  topRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.sm,
-  },
-  brandRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  brandTextCol: {
-    justifyContent: 'center',
-  },
-  titleWithBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  appName: {
-    fontSize: 20,
-    fontWeight: '900',
-    color: COLORS.text,
-    letterSpacing: 0.5,
-  },
-  proPill: {
-    backgroundColor: COLORS.primaryAlpha,
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    borderRadius: RADIUS.sm,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 245, 155, 0.3)',
-  },
-  proPillText: {
-    fontSize: 9,
-    fontWeight: '800',
-    color: COLORS.primary,
-    letterSpacing: 0.5,
-  },
-  appTagline: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: COLORS.textMuted,
-    letterSpacing: 1.2,
-    marginTop: 1,
-  },
-  iconButtons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  iconBtn: {
+  circleBtn: {
     width: 38,
     height: 38,
-    borderRadius: RADIUS.md,
-    backgroundColor: COLORS.surface,
+    borderRadius: 19,
+    backgroundColor: 'rgba(20, 26, 37, 0.72)',
+    borderWidth: 1,
+    borderColor: COLORS.surfaceBorderBright,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.surfaceBorder,
   },
-  profileBtn: {
-    backgroundColor: COLORS.primaryDark,
-    borderColor: COLORS.primary,
+  initialText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.text,
   },
-  dateNavigator: {
+  datePill: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: 'rgba(18, 24, 34, 0.78)',
+    borderWidth: 1,
+    borderColor: COLORS.surfaceBorderBright,
+    borderRadius: RADIUS.full,
+    paddingHorizontal: 10,
+    height: 36,
+    minWidth: 136,
     justifyContent: 'space-between',
-    backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.lg,
-    paddingHorizontal: SPACING.xs,
-    paddingVertical: 3,
-    borderWidth: 1,
-    borderColor: COLORS.surfaceBorder,
   },
-  dateArrow: {
-    width: 34,
-    height: 34,
+  pillChevron: {
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+  },
+  pillCenter: {
+    paddingHorizontal: 10,
+    alignItems: 'center',
     justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: RADIUS.md,
-  },
-  dateBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
   },
   dateText: {
+    fontSize: 13.5,
+    fontWeight: '500',
     color: COLORS.text,
-    fontSize: 13,
-    fontWeight: '700',
     letterSpacing: 0.2,
-  },
-  todayIndicator: {
-    backgroundColor: COLORS.surfaceLight,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: RADIUS.full,
-    marginLeft: SPACING.xs,
-  },
-  todayIndicatorText: {
-    color: COLORS.primary,
-    fontSize: 10,
-    fontWeight: '700',
   },
 });

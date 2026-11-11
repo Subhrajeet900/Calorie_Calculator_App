@@ -1,25 +1,24 @@
-
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS } from '../constants/theme';
 
 export default function MuscleLogo({
-  size = 48,
+  size = 44,
   iconSize,
   glow = true,
   style,
 }) {
-  const finalIconSize = iconSize || size * 0.58;
+  const finalIconSize = iconSize || size * 0.56;
 
   return (
     <View
       style={[
-        styles.container,
+        styles.outerGlow,
         {
           width: size,
           height: size,
-          borderRadius: size * 0.28,
+          borderRadius: size * 0.34,
         },
         glow && styles.glowStyle,
         style,
@@ -29,16 +28,16 @@ export default function MuscleLogo({
         style={[
           styles.innerBadge,
           {
-            width: size * 0.88,
-            height: size * 0.88,
-            borderRadius: size * 0.23,
+            width: size - 3,
+            height: size - 3,
+            borderRadius: (size - 3) * 0.34,
           },
         ]}
       >
         <MaterialCommunityIcons
           name="arm-flex"
           size={finalIconSize}
-          color={COLORS.primary}
+          color={COLORS.accent}
         />
       </View>
     </View>
@@ -46,27 +45,22 @@ export default function MuscleLogo({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: 'rgba(0, 245, 155, 0.2)',
+  outerGlow: {
+    backgroundColor: 'rgba(91, 181, 255, 0.12)',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: 'rgba(0, 245, 155, 0.4)',
+    borderWidth: 1,
+    borderColor: 'rgba(91, 181, 255, 0.32)',
   },
-
   glowStyle: {
-    shadowColor: COLORS.primary,
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
+    shadowColor: COLORS.accent,
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
-    shadowRadius: 8,
+    shadowRadius: 10,
     elevation: 6,
   },
-
   innerBadge: {
-    backgroundColor: '#0F1626',
+    backgroundColor: '#0A0F18',
     justifyContent: 'center',
     alignItems: 'center',
   },

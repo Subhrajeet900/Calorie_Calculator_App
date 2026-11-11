@@ -492,7 +492,7 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.lg,
     backgroundColor: COLORS.primaryAlpha,
     borderWidth: 1,
-    borderColor: 'rgba(16, 185, 129, 0.3)',
+    borderColor: COLORS.surfaceBorderActive,
     marginBottom: SPACING.md,
   },
   demoBtnText: {
