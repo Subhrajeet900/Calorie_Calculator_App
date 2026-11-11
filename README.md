@@ -165,6 +165,14 @@ cd backend
 go test -v ./...
 ```
 
+## after changes to generate new apk file 
+then in terminal do this - 
+
+```bash
+cd "C:\Users\subhrajeet\Calorie Calculator\mobile"
+npx eas-cli build -p android --profile preview
+```
+
 Tests verify:
 - ✅ Mifflin-St Jeor formula for men and women
 - ✅ TDEE calculation across all 5 activity multipliers

@@ -145,3 +145,4 @@ fs.writeFileSync(path.join(assetsDir, 'icon.png'), icon512);
 fs.writeFileSync(path.join(assetsDir, 'android-icon-foreground.png'), icon512);
 fs.writeFileSync(path.join(assetsDir, 'splash-icon.png'), icon512);
 console.log('Successfully generated muscle man icons in mobile/assets/');
+
