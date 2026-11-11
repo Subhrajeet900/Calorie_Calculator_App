@@ -329,7 +329,7 @@ export default function ProfileModal({
                 style={styles.input}
                 value={serverUrl}
                 onChangeText={setServerUrl}
-                placeholder="http://localhost:8080"
+                placeholder="https://calorie-calculator-app.onrender.com"
                 placeholderTextColor={COLORS.textMuted}
                 autoCapitalize="none"
               />

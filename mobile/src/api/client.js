@@ -2,9 +2,8 @@ import { storage } from '../utils/storage';
 import { calculateAll, calculateItemNutrition } from '../utils/calculator';
 import { Platform } from 'react-native';
 
-// Default backend host:
-// Uses your PC's local Wi-Fi IP so physical phones can reach the Go backend directly:
-const DEFAULT_HOST = Platform.OS === 'web' ? 'http://localhost:8080' : 'http://192.168.43.45:8080';
+// Production Cloud Backend (Render):
+const DEFAULT_HOST = 'https://calorie-calculator-app.onrender.com';
 
 let currentServerUrl = `${DEFAULT_HOST}/api`;
 
