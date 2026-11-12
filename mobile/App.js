@@ -8,9 +8,14 @@ import {
   ActivityIndicator,
   Text,
   TouchableOpacity,
-  Platform,
 } from 'react-native';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  SafeAreaProvider,
+  SafeAreaView,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS } from './src/constants/theme';
 import { storage } from './src/utils/storage';
 import { getLocalDateStr } from './src/utils/calculator';
@@ -25,7 +30,7 @@ import CalorieRing from './src/components/CalorieRing';
 import MacroCard from './src/components/MacroCard';
 import WaterTracker from './src/components/WaterTracker';
 import MealCard from './src/components/MealCard';
-import { AmbientAurora, LaurelScore } from './src/components/VisualWidgets';
+import { DuskMeshBackdrop } from './src/components/VisualWidgets';
 
 // Modals
 import FoodSearchModal from './src/components/FoodSearchModal';
@@ -68,6 +73,8 @@ export default function App() {
 }
 
 function MainApp() {
+  const insets = useSafeAreaInsets();
+
   const [user, setUser] = useState(null);
   const [selectedDate, setSelectedDate] = useState(getLocalDateStr());
   const [daySummary, setDaySummary] = useState(null);
@@ -79,6 +86,7 @@ function MainApp() {
   const [showWelcome, setShowWelcome] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [insightsRefresh, setInsightsRefresh] = useState(0);
+  const [waterRefresh, setWaterRefresh] = useState(0);
 
   // Modals
   const [authVisible, setAuthVisible] = useState(false);
@@ -172,6 +180,18 @@ function MainApp() {
     setSearchModalVisible(true);
   };
 
+  const handleQuickHeroWater = async () => {
+    const key = user?.email
+      ? `@water_${String(user.email).trim().toLowerCase()}_${selectedDate}`
+      : `@water_${selectedDate}`;
+    try {
+      const saved = await AsyncStorage.getItem(key);
+      const next = Math.max(0, Number(saved || 0) + 250);
+      await AsyncStorage.setItem(key, String(next));
+      setWaterRefresh((n) => n + 1);
+    } catch {}
+  };
+
   const handleDeleteItem = async (itemId) => {
     try {
       await api.deleteMealItem(itemId);
@@ -213,35 +233,96 @@ function MainApp() {
   );
   const remainingKcal = Math.round(targetKcal - consumedKcal);
   const isOverKcal = consumedKcal > targetKcal;
+  const kcalPct = Math.round((consumedKcal / Math.max(1, targetKcal)) * 100);
   const fuelScore = computeFuelScore(daySummary, user, consistency.activeDays);
 
-  return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.background} />
+  const openProfileOrAuth = () => (user ? setProfileVisible(true) : setAuthVisible(true));
 
-      {/* Top Steel-Blue Aurora Wash */}
-      <AmbientAurora height={350} intensity={1} />
+  const renderHeroCard = () => (
+    <View style={[styles.heroCard, { paddingTop: insets.top + 6 }]}>
+      <DuskMeshBackdrop borderBottomRadius={34} />
 
-      {/* Minimal Flagship Header */}
       <Header
         date={selectedDate}
         onPrevDate={handlePrevDate}
         onNextDate={handleNextDate}
         onToday={handleToday}
-        onOpenWelcome={() => setShowWelcome(true)}
-        onOpenProfile={() => (user ? setProfileVisible(true) : setAuthVisible(true))}
+        onQuickSearch={() => handleOpenAddFood('breakfast')}
+        onOpenProfile={openProfileOrAuth}
         user={user}
       />
+
+      {/* Centered Balance Hero Readout */}
+      <View style={styles.heroCenter}>
+        <Text style={styles.heroLabel}>Daily Intake (kcal)</Text>
+        <Text style={styles.heroValue} numberOfLines={1} adjustsFontSizeToFit>
+          {consumedKcal.toLocaleString()}
+        </Text>
+
+        <View style={styles.heroDeltaPill}>
+          <Text style={styles.heroDeltaText}>
+            {isOverKcal
+              ? `+${Math.abs(remainingKcal).toLocaleString()} over`
+              : `${remainingKcal.toLocaleString()} left`}{' '}
+            · {kcalPct}% · Score {fuelScore}
+          </Text>
+        </View>
+      </View>
+
+      {/* Signature 4-Button Strip: 3 Frosted Circles + Wide Pure White Pill CTA */}
+      <View style={styles.actionStrip}>
+        <TouchableOpacity
+          style={styles.heroCircleBtn}
+          onPress={() => setShowWelcome(true)}
+          activeOpacity={0.78}
+        >
+          <Ionicons name="sparkles-outline" size={20} color="#FFFFFF" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.heroCircleBtn}
+          onPress={handleQuickHeroWater}
+          activeOpacity={0.78}
+        >
+          <Ionicons name="water-outline" size={20} color="#FFFFFF" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.heroCircleBtn}
+          onPress={() => setWeeklyVisible(true)}
+          activeOpacity={0.78}
+        >
+          <Ionicons name="stats-chart-outline" size={19} color="#FFFFFF" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.whiteAddPill}
+          onPress={() => handleOpenAddFood('breakfast')}
+          activeOpacity={0.86}
+        >
+          <Ionicons name="add" size={20} color={COLORS.ctaWhiteText} />
+          <Text style={styles.whiteAddText}>Add Food</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
+  return (
+    <SafeAreaView style={styles.safeArea} edges={['left', 'right']}>
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.heroBase} />
 
       {loading && !daySummary && user ? (
         <View style={styles.centerLoading}>
           <ActivityIndicator size="large" color={COLORS.accent} />
-          <Text style={styles.loadingText}>Syncing Body Fuel Data...</Text>
+          <Text style={styles.loadingText}>Syncing CalCalc Data...</Text>
         </View>
       ) : (
         <ScrollView
           style={styles.container}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingBottom: Math.max(insets.bottom, 16) + 92 },
+          ]}
           showsVerticalScrollIndicator={false}
           bounces={true}
           refreshControl={
@@ -253,18 +334,9 @@ function MainApp() {
             />
           }
         >
-          {/* Centered Laurel Fuel Score */}
-          <View style={styles.scoreSection}>
-            <LaurelScore score={fuelScore} label="Your Nutrition Score" />
-            <Text style={styles.scoreSubtext}>
-              {isOverKcal
-                ? `${Math.abs(remainingKcal)} kcal over daily budget`
-                : `${remainingKcal.toLocaleString()} kcal left`}{' '}
-              • Target {targetKcal.toLocaleString()} kcal
-            </Text>
-          </View>
+          {renderHeroCard()}
 
-          {/* Segmented Pill Tabs: Overview | Meals | Insights */}
+          {/* Outlined Capsule Pill Tabs: Overview | Meals | Insights */}
           <View style={styles.tabBar}>
             {TABS.map((tab) => {
               const isActive = activeTab === tab.id;
@@ -273,7 +345,7 @@ function MainApp() {
                   key={tab.id}
                   style={[styles.tabPill, isActive && styles.tabPillActive]}
                   onPress={() => setActiveTab(tab.id)}
-                  activeOpacity={0.75}
+                  activeOpacity={0.8}
                 >
                   <Text style={[styles.tabText, isActive && styles.tabTextActive]}>
                     {tab.label}
@@ -286,17 +358,6 @@ function MainApp() {
           {/* Tab Views */}
           {activeTab === 'overview' && (
             <>
-              <OverviewBento
-                date={selectedDate}
-                user={user}
-                daySummary={daySummary}
-                activeDays={consistency.activeDays}
-                matrixFlags={consistency.matrixFlags}
-                onQuickLog={(m) => handleOpenAddFood(m)}
-                onOpenProfile={() => (user ? setProfileVisible(true) : setAuthVisible(true))}
-                onSwitchToMeals={() => setActiveTab('meals')}
-              />
-
               <View style={styles.mealsSection}>
                 <Text style={styles.sectionHeader}>TODAY'S MEALS</Text>
 
@@ -332,6 +393,19 @@ function MainApp() {
                   onDeleteItem={handleDeleteItem}
                 />
               </View>
+
+              <OverviewBento
+                date={selectedDate}
+                user={user}
+                daySummary={daySummary}
+                activeDays={consistency.activeDays}
+                matrixFlags={consistency.matrixFlags}
+                waterRefresh={waterRefresh}
+                onWaterChanged={() => setWaterRefresh((n) => n + 1)}
+                onQuickLog={(m) => handleOpenAddFood(m)}
+                onOpenProfile={openProfileOrAuth}
+                onSwitchToMeals={() => setActiveTab('meals')}
+              />
             </>
           )}
 
@@ -352,7 +426,11 @@ function MainApp() {
                 consumedFat={daySummary?.total_fat || 0}
               />
 
-              <WaterTracker date={selectedDate} userEmail={user?.email} />
+              <WaterTracker
+                date={selectedDate}
+                userEmail={user?.email}
+                refreshTrigger={waterRefresh}
+              />
 
               <View style={styles.mealsSection}>
                 <Text style={styles.sectionHeader}>FUEL LOGS</Text>
@@ -399,9 +477,89 @@ function MainApp() {
               onOpenFullModal={() => setWeeklyVisible(true)}
             />
           )}
-
-          <View style={{ height: 64 }} />
         </ScrollView>
+      )}
+
+      {/* Floating Frosted Bottom Navigation Pill Dock */}
+      {!showWelcome && (
+        <View
+          style={[
+            styles.bottomDockWrap,
+            { bottom: Math.max(insets.bottom, 12) + 6 },
+          ]}
+          pointerEvents="box-none"
+        >
+          <View style={styles.bottomDock}>
+            <TouchableOpacity
+              style={[
+                styles.dockBtn,
+                activeTab === 'overview' && styles.dockBtnActive,
+              ]}
+              onPress={() => setActiveTab('overview')}
+              activeOpacity={0.85}
+            >
+              <Ionicons
+                name={activeTab === 'overview' ? 'home' : 'home-outline'}
+                size={20}
+                color={
+                  activeTab === 'overview'
+                    ? COLORS.primaryText
+                    : COLORS.textSecondary
+                }
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.dockBtn,
+                activeTab === 'meals' && styles.dockBtnActive,
+              ]}
+              onPress={() => setActiveTab('meals')}
+              activeOpacity={0.85}
+            >
+              <Ionicons
+                name={activeTab === 'meals' ? 'restaurant' : 'restaurant-outline'}
+                size={20}
+                color={
+                  activeTab === 'meals'
+                    ? COLORS.primaryText
+                    : COLORS.textSecondary
+                }
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.dockBtn,
+                activeTab === 'insights' && styles.dockBtnActive,
+              ]}
+              onPress={() => setActiveTab('insights')}
+              activeOpacity={0.85}
+            >
+              <Ionicons
+                name={activeTab === 'insights' ? 'analytics' : 'analytics-outline'}
+                size={20}
+                color={
+                  activeTab === 'insights'
+                    ? COLORS.primaryText
+                    : COLORS.textSecondary
+                }
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.dockBtn}
+              onPress={openProfileOrAuth}
+              activeOpacity={0.85}
+            >
+              <Ionicons
+                name="person-outline"
+                size={20}
+                color={COLORS.textSecondary}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
       )}
 
       {/* Interactive Swipe-Up Opening Section */}
@@ -453,10 +611,10 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: 'transparent',
+    backgroundColor: COLORS.background,
   },
   scrollContent: {
-    paddingBottom: Platform.OS === 'ios' ? 40 : 20,
+    paddingBottom: 110,
   },
   centerLoading: {
     flex: 1,
@@ -468,56 +626,147 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     fontSize: 13,
     fontWeight: '500',
-    letterSpacing: 0.4,
   },
-  scoreSection: {
+  heroCard: {
+    position: 'relative',
+    overflow: 'hidden',
+    borderBottomLeftRadius: 34,
+    borderBottomRightRadius: 34,
+    paddingBottom: SPACING.xl,
+    marginBottom: SPACING.lg,
+  },
+  heroCenter: {
     alignItems: 'center',
-    paddingTop: SPACING.xs,
-    paddingBottom: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    marginTop: SPACING.md,
+    marginBottom: SPACING.lg + 2,
   },
-  scoreSubtext: {
-    fontSize: 11.5,
-    color: COLORS.textMuted,
-    marginTop: 6,
+  heroLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.78)',
     letterSpacing: 0.2,
+  },
+  heroValue: {
+    fontSize: 50,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    letterSpacing: -1.4,
+    marginTop: 2,
+  },
+  heroDeltaPill: {
+    marginTop: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 5,
+    borderRadius: RADIUS.full,
+    backgroundColor: 'rgba(255, 255, 255, 0.14)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.14)',
+  },
+  heroDeltaText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.92)',
+  },
+  actionStrip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.xl,
+    gap: 10,
+  },
+  heroCircleBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.14)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.16)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  whiteAddPill: {
+    flex: 1,
+    height: 48,
+    borderRadius: RADIUS.full,
+    backgroundColor: COLORS.ctaWhite,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  whiteAddText: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: COLORS.ctaWhiteText,
   },
   tabBar: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: SPACING.lg,
+    marginHorizontal: SPACING.lg,
     marginBottom: SPACING.lg,
-    paddingHorizontal: SPACING.lg,
-  },
-  tabPill: {
-    paddingHorizontal: 18,
-    paddingVertical: 8,
+    padding: 4,
     borderRadius: RADIUS.full,
     borderWidth: 1,
-    borderColor: 'transparent',
+    borderColor: COLORS.surfaceBorderBright,
+    backgroundColor: COLORS.background,
+  },
+  tabPill: {
+    flex: 1,
+    paddingVertical: 11,
+    borderRadius: RADIUS.full,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   tabPillActive: {
-    backgroundColor: 'rgba(18, 24, 34, 0.85)',
-    borderColor: COLORS.surfaceBorderBright,
+    backgroundColor: COLORS.primary,
   },
   tabText: {
     fontSize: 13.5,
-    fontWeight: '400',
-    color: COLORS.textMuted,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
   },
   tabTextActive: {
-    color: COLORS.text,
-    fontWeight: '500',
+    color: COLORS.primaryText,
+    fontWeight: '800',
   },
   mealsSection: {
-    marginTop: SPACING.lg,
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.sm,
   },
   sectionHeader: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '700',
     color: COLORS.textMuted,
     letterSpacing: 1.4,
-    paddingHorizontal: SPACING.lg,
-    marginBottom: 4,
+    marginBottom: SPACING.md,
+    marginLeft: 2,
+  },
+  bottomDockWrap: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 30,
+  },
+  bottomDock: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: RADIUS.full,
+    backgroundColor: 'rgba(19, 20, 26, 0.94)',
+    borderWidth: 1,
+    borderColor: COLORS.surfaceBorderBright,
+  },
+  dockBtn: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: '#1D1F28',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dockBtnActive: {
+    backgroundColor: COLORS.primary,
   },
 });

@@ -161,10 +161,17 @@ export default function InsightsTab({ selectedDate, refreshTrigger, onOpenFullMo
           activeOpacity={0.85}
         >
           <View style={styles.detailLeft}>
-            <Ionicons name="shield-checkmark-outline" size={18} color={COLORS.accent} />
-            <Text style={styles.detailText}>On-Device Storage & Cloud Synced</Text>
+            <View style={styles.detailCircle}>
+              <Ionicons name="shield-checkmark-outline" size={18} color={COLORS.accent} />
+            </View>
+            <View>
+              <Text style={styles.detailTitle}>7-Day Trajectory</Text>
+              <Text style={styles.detailText}>Local + cloud synced reports</Text>
+            </View>
           </View>
-          <Ionicons name="expand-outline" size={16} color={COLORS.textSecondary} />
+          <View style={styles.detailPill}>
+            <Text style={styles.detailPillText}>OPEN</Text>
+          </View>
         </TouchableOpacity>
       )}
     </View>
@@ -306,18 +313,49 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.xl,
-    padding: SPACING.md + 2,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: 14,
     borderWidth: 1,
     borderColor: COLORS.surfaceBorder,
   },
   detailLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.sm,
+    gap: 12,
+  },
+  detailCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#1B1D26',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  detailTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.text,
   },
   detailText: {
-    fontSize: 12.5,
+    fontSize: 12,
     fontWeight: '500',
-    color: COLORS.textSecondary,
+    color: COLORS.textMuted,
+    marginTop: 1,
+  },
+  detailPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: RADIUS.full,
+    borderWidth: 1,
+    borderColor: COLORS.surfaceBorderBright,
+  },
+  detailPillText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: COLORS.text,
+    letterSpacing: 0.5,
   },
 });
+

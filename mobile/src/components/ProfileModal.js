@@ -182,7 +182,7 @@ export default function ProfileModal({
                     <Ionicons
                       name="male"
                       size={16}
-                      color={gender === 'male' ? '#FFFFFF' : COLORS.textSecondary}
+                      color={gender === 'male' ? COLORS.primaryText : COLORS.textSecondary}
                     />
                     <Text
                       style={[
@@ -201,7 +201,7 @@ export default function ProfileModal({
                     <Ionicons
                       name="female"
                       size={16}
-                      color={gender === 'female' ? '#FFFFFF' : COLORS.textSecondary}
+                      color={gender === 'female' ? COLORS.primaryText : COLORS.textSecondary}
                     />
                     <Text
                       style={[
@@ -344,10 +344,10 @@ export default function ProfileModal({
               style={styles.saveBtn}
               onPress={handleSave}
               disabled={saving}
-              activeOpacity={0.8}
+              activeOpacity={0.85}
             >
               {saving ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
+                <ActivityIndicator size="small" color={COLORS.ctaWhiteText} />
               ) : (
                 <Text style={styles.saveBtnText}>Save Profile & Targets</Text>
               )}
@@ -373,13 +373,15 @@ export default function ProfileModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    backgroundColor: 'rgba(0, 0, 0, 0.82)',
     justifyContent: 'flex-end',
   },
   sheetContainer: {
     backgroundColor: COLORS.surface,
-    borderTopLeftRadius: RADIUS.xl,
-    borderTopRightRadius: RADIUS.xl,
+    borderTopLeftRadius: RADIUS.xxl,
+    borderTopRightRadius: RADIUS.xxl,
+    borderTopWidth: 1,
+    borderColor: COLORS.surfaceBorderBright,
     maxHeight: '90%',
     paddingBottom: SPACING.xl,
   },
@@ -404,10 +406,12 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   closeBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: RADIUS.md,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: COLORS.surfaceLight,
+    borderWidth: 1,
+    borderColor: COLORS.surfaceBorder,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -520,8 +524,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    height: 40,
-    borderRadius: RADIUS.md,
+    height: 42,
+    borderRadius: RADIUS.full,
     backgroundColor: COLORS.surfaceLight,
     borderWidth: 1,
     borderColor: COLORS.surfaceBorder,
@@ -536,8 +540,8 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
   },
   toggleBtnTextActive: {
-    color: '#FFFFFF',
-    fontWeight: '700',
+    color: COLORS.primaryText,
+    fontWeight: '800',
   },
   triRow: {
     flexDirection: 'row',
@@ -593,16 +597,16 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   saveBtn: {
-    backgroundColor: COLORS.primary,
-    borderRadius: RADIUS.lg,
-    paddingVertical: SPACING.md,
+    backgroundColor: COLORS.ctaWhite,
+    borderRadius: RADIUS.full,
+    paddingVertical: SPACING.md + 2,
     alignItems: 'center',
     marginTop: SPACING.sm,
   },
   saveBtnText: {
     fontSize: 14,
-    fontWeight: '700',
-    color: '#FFFFFF',
+    fontWeight: '800',
+    color: COLORS.ctaWhiteText,
   },
   logoutBtn: {
     flexDirection: 'row',

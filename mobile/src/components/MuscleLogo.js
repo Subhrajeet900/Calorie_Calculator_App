@@ -18,7 +18,7 @@ export default function MuscleLogo({
         {
           width: size,
           height: size,
-          borderRadius: size * 0.34,
+          borderRadius: size * 0.36,
         },
         glow && styles.glowStyle,
         style,
@@ -30,14 +30,14 @@ export default function MuscleLogo({
           {
             width: size - 3,
             height: size - 3,
-            borderRadius: (size - 3) * 0.34,
+            borderRadius: (size - 3) * 0.36,
           },
         ]}
       >
         <MaterialCommunityIcons
           name="arm-flex"
           size={finalIconSize}
-          color={COLORS.accent}
+          color={COLORS.primary}
         />
       </View>
     </View>
@@ -46,21 +46,21 @@ export default function MuscleLogo({
 
 const styles = StyleSheet.create({
   outerGlow: {
-    backgroundColor: 'rgba(91, 181, 255, 0.12)',
+    backgroundColor: 'rgba(235, 248, 138, 0.14)',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(91, 181, 255, 0.32)',
+    borderColor: 'rgba(235, 248, 138, 0.35)',
   },
   glowStyle: {
-    shadowColor: COLORS.accent,
+    shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.3,
     shadowRadius: 10,
     elevation: 6,
   },
   innerBadge: {
-    backgroundColor: '#0A0F18',
+    backgroundColor: '#13111C',
     justifyContent: 'center',
     alignItems: 'center',
   },

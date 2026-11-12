@@ -17,6 +17,8 @@ export default function OverviewBento({
   daySummary,
   activeDays = 1,
   matrixFlags = [],
+  waterRefresh = 0,
+  onWaterChanged,
   onQuickLog,
   onOpenProfile,
   onSwitchToMeals,
@@ -29,7 +31,7 @@ export default function OverviewBento({
 
   useEffect(() => {
     loadWater();
-  }, [date, user?.email]);
+  }, [date, user?.email, waterRefresh]);
 
   const loadWater = async () => {
     try {
@@ -48,6 +50,7 @@ export default function OverviewBento({
     setWaterMl(next);
     try {
       await AsyncStorage.setItem(scopedWaterKey, String(next));
+      if (onWaterChanged) onWaterChanged();
     } catch {}
   };
 
@@ -174,7 +177,7 @@ export default function OverviewBento({
               variant="descending"
               progress={Math.max(0.25, waterMl / waterGoal)}
               height={52}
-              lineColor="#E2E8F0"
+              lineColor={COLORS.water}
             />
           </View>
         </TouchableOpacity>
@@ -205,7 +208,7 @@ export default function OverviewBento({
         </View>
       </TouchableOpacity>
 
-      {/* Quick Action Bar to Log Food directly from Overview */}
+      {/* Quick Action Bar matching Charcoal Card + Pill CTA */}
       <TouchableOpacity
         style={styles.quickLogBar}
         onPress={() => onQuickLog && onQuickLog('breakfast')}
@@ -213,16 +216,18 @@ export default function OverviewBento({
       >
         <View style={styles.quickLogLeft}>
           <View style={styles.quickLogIcon}>
-            <Ionicons name="add" size={18} color="#FFFFFF" />
+            <Ionicons name="add" size={20} color={COLORS.primaryText} />
           </View>
-          <View>
+          <View style={{ flex: 1 }}>
             <Text style={styles.quickLogTitle}>Log Food or Meal</Text>
-            <Text style={styles.quickLogSub}>
-              Search 129+ foods with piece/count or gram tracking
+            <Text style={styles.quickLogSub} numberOfLines={1}>
+              129+ foods · piece/count or grams
             </Text>
           </View>
         </View>
-        <Ionicons name="chevron-forward" size={18} color={COLORS.textSecondary} />
+        <View style={styles.logBadgePill}>
+          <Text style={styles.logBadgeText}>LOG</Text>
+        </View>
       </TouchableOpacity>
     </View>
   );
@@ -326,34 +331,50 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: COLORS.surfaceLight,
+    backgroundColor: COLORS.surface,
     borderRadius: RADIUS.xl,
-    padding: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: 14,
     borderWidth: 1,
-    borderColor: COLORS.surfaceBorderBright,
+    borderColor: COLORS.surfaceBorder,
   },
   quickLogLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.md,
+    gap: 12,
     flex: 1,
+    paddingRight: 8,
   },
   quickLogIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: RADIUS.md,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
   quickLogTitle: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '700',
     color: COLORS.text,
   },
   quickLogSub: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.textSecondary,
-    marginTop: 1,
+    marginTop: 2,
+  },
+  logBadgePill: {
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: RADIUS.full,
+    borderWidth: 1,
+    borderColor: COLORS.surfaceBorderBright,
+  },
+  logBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.text,
+    letterSpacing: 0.5,
   },
 });
+

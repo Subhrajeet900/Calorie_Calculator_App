@@ -1,10 +1,10 @@
-# 🥑 Calorie Calculator App
+# Calorie Calculator App
 
 > A fast, privacy-friendly mobile app (Expo / React Native) with a Go backend (Gin + GORM) that calculates daily calorie needs, logs meals, and tracks nutrition goals — **100% zero-Docker, zero tracking, and lightweight**.
 
 ---
 
-## 🎯 The Problem We Are Solving
+## The Problem We Are Solving
 
 1. **Confusing numbers**: Most people do not know how many calories their body actually burns and needs daily.
 2. **Bloated apps**: Existing trackers are heavy, ad-filled, collect personal data, and force unnecessary subscriptions.
@@ -17,7 +17,7 @@
 
 ---
 
-## 🏗️ Architecture & Technology Stack
+## Architecture & Technology Stack
 
 ```
 ┌───────────────────────────────────────────────┐
@@ -50,7 +50,7 @@
 
 ---
 
-## 🧮 Core Algorithm: Mifflin-St Jeor Equation
+## Core Algorithm: Mifflin-St Jeor Equation
 
 ### 1. Basal Metabolic Rate (BMR)
 $$\text{BMR}_{\text{men}} = 10 \times \text{weight (kg)} + 6.25 \times \text{height (cm)} - 5 \times \text{age} + 5$$
@@ -80,7 +80,7 @@ For a given target calorie intake:
 
 ---
 
-## 🗄️ Database Models
+## Database Models
 
 - `users`: ID, Name, Email, PasswordHash, Age, Gender, Height (cm), Weight (kg), ActivityLevel, Goal, BMR, TDEE, TargetCalories, TargetProtein, TargetCarbs, TargetFat.
 - `foods`: ID, Name, Category, ServingUnit, ServingSize, CaloriesPer100g, ProteinPer100g, CarbsPer100g, FatPer100g, IsCustom, UserID.
@@ -90,7 +90,7 @@ For a given target calorie intake:
 
 ---
 
-## 📡 REST API Endpoints
+## REST API Endpoints
 
 | Method | Endpoint | Auth | Description |
 | :--- | :--- | :---: | :--- |
@@ -110,7 +110,7 @@ For a given target calorie intake:
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### 1. Prerequisites
 - **Go** (1.22+ installed)
@@ -156,7 +156,7 @@ Press:
 
 ---
 
-## 🧪 Testing
+## Testing
 
 The Go backend comes with full unit and integration test coverage:
 
@@ -186,7 +186,7 @@ Tests verify:
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```
 Calorie Calculator/

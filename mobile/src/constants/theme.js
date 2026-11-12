@@ -1,56 +1,60 @@
 export const COLORS = {
-  // Pitch Obsidian & Graphite Glass Canvas
-  background: '#05070B',
-  backgroundElevated: '#0A0D14',
+  // Pitch-Black & Charcoal Canvas (Matched to Dusk/Lime Reference)
+  background: '#06070B',
+  backgroundElevated: '#0C0D13',
 
-  // Ambient Top Steel-Navy Aurora Glows
-  auroraDeep: '#0D2238',
-  auroraMid: '#153759',
-  auroraSoft: 'rgba(56, 139, 253, 0.14)',
+  // Dusk Violet -> Sunset Peach Top Hero Glow Palette
+  heroBase: '#13111C',
+  heroViolet: '#35284A',
+  heroMauve: '#624663',
+  heroPeach: '#C2806D',
+  heroHighlight: '#E29E84',
 
-  // Obsidian Glass Surfaces & Hairline Borders
-  surface: '#0E121A',
-  surfaceLight: '#141A25',
-  surfacePill: '#161C26',
+  // Charcoal Card Surfaces & Hairline Borders
+  surface: '#111217',
+  surfaceLight: '#1A1C24',
+  surfacePill: '#15171F',
   surfaceBorder: 'rgba(255, 255, 255, 0.08)',
-  surfaceBorderBright: 'rgba(255, 255, 255, 0.15)',
-  surfaceBorderActive: 'rgba(91, 181, 255, 0.45)',
+  surfaceBorderBright: 'rgba(255, 255, 255, 0.14)',
+  surfaceBorderActive: 'rgba(235, 248, 138, 0.45)',
 
-  // Signature Glacier Blue & Sapphire Interactive Accents
-  primary: '#2F80ED',
-  primaryLight: '#5BB5FF',
-  primaryDark: '#1D5EC4',
-  primaryAlpha: 'rgba(91, 181, 255, 0.14)',
-  primaryGlow: 'rgba(91, 181, 255, 0.28)',
-  accent: '#5BB5FF',
-  accentMuted: '#1E2D40',
+  // Signature Pastel Butter-Lime Accent & Crisp White CTA
+  primary: '#EBF88A',
+  primaryText: '#090A0F',
+  primaryLight: '#F3FBA8',
+  primaryDark: '#C9D95C',
+  primaryAlpha: 'rgba(235, 248, 138, 0.14)',
+  primaryGlow: 'rgba(235, 248, 138, 0.25)',
+  accent: '#EBF88A',
+  ctaWhite: '#FFFFFF',
+  ctaWhiteText: '#090A0F',
 
-  // Crisp Monochromatic Typography
+  // Typography
   text: '#F8FAFC',
-  textSecondary: '#94A3B8',
-  textMuted: '#687385',
+  textSecondary: '#9CA3AF',
+  textMuted: '#6B7280',
 
-  // Macro Colors (Refined Jewel Tones)
-  protein: '#5BB5FF',       // Glacier Blue
-  proteinAlpha: 'rgba(91, 181, 255, 0.14)',
-  carbs: '#FBBF24',         // Warm Amber
-  carbsAlpha: 'rgba(251, 191, 36, 0.14)',
-  fat: '#A78BFA',           // Cool Violet
-  fatAlpha: 'rgba(167, 139, 250, 0.14)',
+  // Macros Harmonized with Dusk + Lime Palette
+  protein: '#EBF88A',       // Butter-Lime
+  proteinAlpha: 'rgba(235, 248, 138, 0.14)',
+  carbs: '#E29E84',         // Sunset Coral Peach
+  carbsAlpha: 'rgba(226, 158, 132, 0.15)',
+  fat: '#B49BF8',           // Dusk Lavender
+  fatAlpha: 'rgba(180, 155, 248, 0.15)',
 
   // Hydration
-  water: '#38BDF8',
-  waterAlpha: 'rgba(56, 189, 248, 0.14)',
+  water: '#7DD3FC',
+  waterAlpha: 'rgba(125, 211, 252, 0.14)',
 
-  // Status Pills (Green Up / Crimson Down)
-  success: '#22C55E',
+  // Status Indicators
+  success: '#4ADE80',
   successLight: '#4ADE80',
-  successAlpha: 'rgba(34, 197, 94, 0.16)',
-  danger: '#EF4444',
+  successAlpha: 'rgba(74, 222, 128, 0.14)',
+  danger: '#F87171',
   dangerLight: '#F87171',
-  dangerAlpha: 'rgba(239, 68, 68, 0.16)',
-  warning: '#F59E0B',
-  gold: '#E2E8F0',
+  dangerAlpha: 'rgba(248, 113, 113, 0.15)',
+  warning: '#FBBF24',
+  gold: '#EBF88A',
 };
 
 export const SPACING = {
@@ -65,9 +69,9 @@ export const SPACING = {
 
 export const RADIUS = {
   sm: 10,
-  md: 14,
-  lg: 18,
-  xl: 22,
-  xxl: 28,
+  md: 16,
+  lg: 20,
+  xl: 24,
+  xxl: 32,
   full: 9999,
 };

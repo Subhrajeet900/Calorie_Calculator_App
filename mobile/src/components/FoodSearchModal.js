@@ -571,13 +571,13 @@ export default function FoodSearchModal({
                     style={styles.logBtn}
                     onPress={handleConfirmLog}
                     disabled={logging || !effectiveGrams}
-                    activeOpacity={0.8}
+                    activeOpacity={0.85}
                   >
                     {logging ? (
-                      <ActivityIndicator size="small" color="#FFFFFF" />
+                      <ActivityIndicator size="small" color={COLORS.ctaWhiteText} />
                     ) : (
                       <>
-                        <Ionicons name="checkmark-circle" size={18} color="#FFFFFF" />
+                        <Ionicons name="checkmark-circle" size={18} color={COLORS.ctaWhiteText} />
                         <Text style={styles.logBtnText}>
                           {inputMode === 'serving' && selectedMeta.hasCountUnit
                             ? `Add ${servingCount || 0} ${unitLabelPlural} to ${mealType.charAt(0).toUpperCase() + mealType.slice(1)}`
@@ -664,10 +664,10 @@ export default function FoodSearchModal({
                 style={styles.saveCustomBtn}
                 onPress={handleCreateCustomFood}
                 disabled={logging || !customName.trim() || !customCalories}
-                activeOpacity={0.8}
+                activeOpacity={0.85}
               >
                 {logging ? (
-                  <ActivityIndicator size="small" color="#FFFFFF" />
+                  <ActivityIndicator size="small" color={COLORS.ctaWhiteText} />
                 ) : (
                   <Text style={styles.saveCustomBtnText}>Save and Select Food</Text>
                 )}
@@ -683,13 +683,15 @@ export default function FoodSearchModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    backgroundColor: 'rgba(0, 0, 0, 0.82)',
     justifyContent: 'flex-end',
   },
   sheetContainer: {
     backgroundColor: COLORS.surface,
-    borderTopLeftRadius: RADIUS.xl,
-    borderTopRightRadius: RADIUS.xl,
+    borderTopLeftRadius: RADIUS.xxl,
+    borderTopRightRadius: RADIUS.xxl,
+    borderTopWidth: 1,
+    borderColor: COLORS.surfaceBorderBright,
     maxHeight: '90%',
     paddingBottom: SPACING.xl,
   },
@@ -714,36 +716,44 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   closeBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: RADIUS.md,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: COLORS.surfaceLight,
+    borderWidth: 1,
+    borderColor: COLORS.surfaceBorder,
     justifyContent: 'center',
     alignItems: 'center',
   },
   tabBar: {
     flexDirection: 'row',
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.sm,
-    gap: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.surfaceBorder,
+    marginHorizontal: SPACING.lg,
+    marginTop: SPACING.md,
+    padding: 4,
+    borderRadius: RADIUS.full,
+    borderWidth: 1,
+    borderColor: COLORS.surfaceBorderBright,
+    backgroundColor: COLORS.backgroundElevated,
+    gap: 4,
   },
   tabItem: {
-    paddingVertical: SPACING.xs,
+    flex: 1,
+    paddingVertical: 8,
     paddingHorizontal: SPACING.sm,
-    borderRadius: RADIUS.sm,
+    borderRadius: RADIUS.full,
+    alignItems: 'center',
   },
   tabItemActive: {
-    backgroundColor: COLORS.primaryAlpha,
+    backgroundColor: COLORS.primary,
   },
   tabText: {
-    fontSize: 13,
+    fontSize: 12.5,
     fontWeight: '600',
-    color: COLORS.textMuted,
+    color: COLORS.textSecondary,
   },
   tabTextActive: {
-    color: COLORS.primary,
+    color: COLORS.primaryText,
+    fontWeight: '800',
   },
   searchBox: {
     flexDirection: 'row',
@@ -789,8 +799,8 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   categoryChipTextActive: {
-    color: '#FFFFFF',
-    fontWeight: '700',
+    color: COLORS.primaryText,
+    fontWeight: '800',
   },
   foodsList: {
     maxHeight: 280,
@@ -870,32 +880,30 @@ const styles = StyleSheet.create({
   modeToggleRow: {
     flexDirection: 'row',
     backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.md,
+    borderRadius: RADIUS.full,
     padding: 3,
     marginBottom: SPACING.sm,
     borderWidth: 1,
-    borderColor: COLORS.surfaceBorder,
+    borderColor: COLORS.surfaceBorderBright,
     gap: 4,
   },
   modePill: {
     flex: 1,
-    paddingVertical: 6,
-    borderRadius: RADIUS.sm,
+    paddingVertical: 7,
+    borderRadius: RADIUS.full,
     alignItems: 'center',
   },
   modePillActive: {
-    backgroundColor: COLORS.primaryAlpha,
-    borderWidth: 1,
-    borderColor: COLORS.primary,
+    backgroundColor: COLORS.primary,
   },
   modePillText: {
     fontSize: 11,
     fontWeight: '600',
-    color: COLORS.textMuted,
+    color: COLORS.textSecondary,
   },
   modePillTextActive: {
-    color: COLORS.primary,
-    fontWeight: '700',
+    color: COLORS.primaryText,
+    fontWeight: '800',
   },
   stepperBox: {
     flexDirection: 'row',
@@ -1021,7 +1029,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 8,
     alignItems: 'center',
-    borderRadius: RADIUS.sm,
+    borderRadius: RADIUS.full,
     backgroundColor: COLORS.surface,
     borderWidth: 1,
     borderColor: COLORS.surfaceBorder,
@@ -1036,22 +1044,22 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
   },
   mealSelectTextActive: {
-    color: '#FFFFFF',
-    fontWeight: '700',
+    color: COLORS.primaryText,
+    fontWeight: '800',
   },
   logBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: COLORS.primary,
-    borderRadius: RADIUS.lg,
-    paddingVertical: SPACING.md,
+    backgroundColor: COLORS.ctaWhite,
+    borderRadius: RADIUS.full,
+    paddingVertical: SPACING.md + 1,
     gap: 8,
   },
   logBtnText: {
     fontSize: 14,
-    fontWeight: '700',
-    color: '#FFFFFF',
+    fontWeight: '800',
+    color: COLORS.ctaWhiteText,
   },
   customForm: {
     padding: SPACING.lg,
@@ -1092,17 +1100,17 @@ const styles = StyleSheet.create({
     gap: SPACING.md,
   },
   saveCustomBtn: {
-    backgroundColor: COLORS.primary,
-    borderRadius: RADIUS.lg,
-    paddingVertical: SPACING.md,
+    backgroundColor: COLORS.ctaWhite,
+    borderRadius: RADIUS.full,
+    paddingVertical: SPACING.md + 1,
     alignItems: 'center',
     marginTop: SPACING.sm,
     marginBottom: SPACING.xxl,
   },
   saveCustomBtnText: {
     fontSize: 14,
-    fontWeight: '700',
-    color: '#FFFFFF',
+    fontWeight: '800',
+    color: COLORS.ctaWhiteText,
   },
 });
 

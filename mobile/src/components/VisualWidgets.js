@@ -4,7 +4,33 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS, RADIUS } from '../constants/theme';
 
 /**
- * Overhead steel-navy radial ambient light wash for flagship obsidian look
+ * Multi-layer Dusk Violet -> Mauve -> Sunset Peach organic mesh backdrop
+ * Replicates the top-right warm peach glow blending into deep violet obsidian.
+ */
+export function DuskMeshBackdrop({ borderBottomRadius = 0 }) {
+  return (
+    <View
+      style={[
+        styles.meshClip,
+        {
+          borderBottomLeftRadius: borderBottomRadius,
+          borderBottomRightRadius: borderBottomRadius,
+        },
+      ]}
+      pointerEvents="none"
+    >
+      <View style={styles.meshDeepBase} />
+      <View style={styles.meshVioletPool} />
+      <View style={styles.meshMauveSweep} />
+      <View style={styles.meshPeachGlow} />
+      <View style={styles.meshHighlightCore} />
+      <View style={styles.meshTopVignette} />
+    </View>
+  );
+}
+
+/**
+ * Overhead dusk radial ambient light wash
  */
 export function AmbientAurora({ height = 340, intensity = 1 }) {
   return (
@@ -12,19 +38,19 @@ export function AmbientAurora({ height = 340, intensity = 1 }) {
       <View
         style={[
           styles.auroraOrbOuter,
-          { opacity: 0.42 * intensity },
+          { opacity: 0.48 * intensity },
         ]}
       />
       <View
         style={[
           styles.auroraOrbMid,
-          { opacity: 0.32 * intensity },
+          { opacity: 0.36 * intensity },
         ]}
       />
       <View
         style={[
           styles.auroraOrbInner,
-          { opacity: 0.18 * intensity },
+          { opacity: 0.22 * intensity },
         ]}
       />
     </View>
@@ -118,9 +144,9 @@ export function SmoothSparkCurve({
   variant = 'ascending',
   progress = 0.72,
   height = 56,
-  lineColor = '#E2E8F0',
+  lineColor = COLORS.primary,
   dotColor = '#FFFFFF',
-  glowColor = 'rgba(91, 181, 255, 0.45)',
+  glowColor = 'rgba(235, 248, 138, 0.32)',
 }) {
   const [width, setWidth] = useState(120);
   const clamped = Math.max(0.15, Math.min(0.88, progress));
@@ -281,7 +307,7 @@ export function DualWaveCurve({ height = 56, nodeProgress = 0.62 }) {
             top: 4,
             width: 1.5,
             height: height - 8,
-            backgroundColor: 'rgba(91, 181, 255, 0.22)',
+            backgroundColor: 'rgba(226, 158, 132, 0.24)',
           }}
         />
       )}
@@ -293,11 +319,11 @@ export function DualWaveCurve({ height = 56, nodeProgress = 0.62 }) {
             {
               left: dotPt.x - 10,
               top: dotPt.y - 10,
-              backgroundColor: 'rgba(91, 181, 255, 0.35)',
+              backgroundColor: 'rgba(235, 248, 138, 0.28)',
             },
           ]}
         >
-          <View style={[styles.dotCore, { backgroundColor: '#93C5FD' }]} />
+          <View style={[styles.dotCore, { backgroundColor: COLORS.primary }]} />
         </View>
       )}
     </View>
@@ -305,7 +331,7 @@ export function DualWaveCurve({ height = 56, nodeProgress = 0.62 }) {
 }
 
 /**
- * Glacier-blue vertical waveform equalizer bars matching ACTIVE TIME widget
+ * Dual-sine lime/peach curve for wide bottom Weight/Targets card
  */
 export function WaveformBars({ fillRatio = 0.68, height = 56 }) {
   const pattern = [
@@ -327,10 +353,10 @@ export function WaveformBars({ fillRatio = 0.68, height = 56 }) {
               {
                 height: barH,
                 backgroundColor: isLit
-                  ? idx % 2 === 0
-                    ? COLORS.accent
-                    : '#7DD3FC'
-                  : 'rgba(91, 181, 255, 0.2)',
+                  ? idx % 3 === 0
+                    ? COLORS.carbs
+                    : COLORS.primary
+                  : 'rgba(255, 255, 255, 0.14)',
               },
             ]}
           />
@@ -372,6 +398,65 @@ export function ActivityTileMatrix({ activeFlags = [] }) {
 }
 
 const styles = StyleSheet.create({
+  meshClip: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: 'hidden',
+    backgroundColor: COLORS.heroBase,
+  },
+  meshDeepBase: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: COLORS.heroBase,
+  },
+  meshVioletPool: {
+    position: 'absolute',
+    bottom: -90,
+    left: -60,
+    width: 340,
+    height: 300,
+    borderRadius: 170,
+    backgroundColor: COLORS.heroViolet,
+    opacity: 0.78,
+  },
+  meshMauveSweep: {
+    position: 'absolute',
+    top: -40,
+    right: -70,
+    width: 340,
+    height: 320,
+    borderRadius: 170,
+    backgroundColor: COLORS.heroMauve,
+    opacity: 0.62,
+  },
+  meshPeachGlow: {
+    position: 'absolute',
+    top: 30,
+    right: -95,
+    width: 280,
+    height: 280,
+    borderRadius: 140,
+    backgroundColor: COLORS.heroPeach,
+    opacity: 0.56,
+  },
+  meshHighlightCore: {
+    position: 'absolute',
+    top: 90,
+    right: -65,
+    width: 175,
+    height: 175,
+    borderRadius: 90,
+    backgroundColor: COLORS.heroHighlight,
+    opacity: 0.34,
+  },
+  meshTopVignette: {
+    position: 'absolute',
+    top: -120,
+    left: -50,
+    width: 250,
+    height: 240,
+    borderRadius: 125,
+    backgroundColor: '#0A0912',
+    opacity: 0.6,
+  },
   auroraWrap: {
     position: 'absolute',
     top: 0,
@@ -386,7 +471,7 @@ const styles = StyleSheet.create({
     width: 520,
     height: 360,
     borderRadius: 260,
-    backgroundColor: COLORS.auroraDeep,
+    backgroundColor: COLORS.heroViolet,
   },
   auroraOrbMid: {
     position: 'absolute',
@@ -394,7 +479,7 @@ const styles = StyleSheet.create({
     width: 390,
     height: 320,
     borderRadius: 200,
-    backgroundColor: COLORS.auroraMid,
+    backgroundColor: COLORS.heroMauve,
   },
   auroraOrbInner: {
     position: 'absolute',
@@ -402,7 +487,7 @@ const styles = StyleSheet.create({
     width: 240,
     height: 270,
     borderRadius: 140,
-    backgroundColor: '#3B82F6',
+    backgroundColor: COLORS.heroPeach,
   },
   laurelWrap: {
     alignItems: 'center',
@@ -513,3 +598,4 @@ const styles = StyleSheet.create({
     backgroundColor: '#19202C',
   },
 });
+

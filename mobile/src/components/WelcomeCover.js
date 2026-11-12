@@ -12,15 +12,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS } from '../constants/theme';
 import MuscleLogo from './MuscleLogo';
-import { AmbientAurora, LaurelScore } from './VisualWidgets';
+import { DuskMeshBackdrop } from './VisualWidgets';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 function getGreeting() {
   const hr = new Date().getHours();
-  if (hr < 12) return 'GOOD MORNING';
-  if (hr < 17) return 'GOOD AFTERNOON';
-  return 'GOOD EVENING';
+  if (hr < 12) return 'Good morning';
+  if (hr < 17) return 'Good afternoon';
+  return 'Good evening';
 }
 
 export default function WelcomeCover({
@@ -46,13 +46,13 @@ export default function WelcomeCover({
     const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(bounceAnim, {
-          toValue: -8,
-          duration: 950,
+          toValue: -7,
+          duration: 900,
           useNativeDriver: true,
         }),
         Animated.timing(bounceAnim, {
           toValue: 0,
-          duration: 950,
+          duration: 900,
           useNativeDriver: true,
         }),
       ])
@@ -105,107 +105,123 @@ export default function WelcomeCover({
     extrapolate: 'clamp',
   });
 
+  const remaining = Math.max(0, Math.round(targetKcal - consumedKcal));
+  const pct = Math.min(100, Math.round((consumedKcal / Math.max(1, targetKcal)) * 100));
+
   return (
     <Animated.View
       {...panResponder.panHandlers}
       style={[
         styles.coverContainer,
         {
-          paddingTop: Math.max(insets.top + 14, 34),
-          paddingBottom: Math.max(insets.bottom + 24, 34),
           transform: [{ translateY }],
           opacity: overlayOpacity,
         },
       ]}
     >
-      <AmbientAurora height={440} intensity={1.15} />
-
-      {/* Top Subtle Brand Pill */}
-      <View style={styles.topPill}>
-        <View style={styles.liveDot} />
-        <Text style={styles.topPillText}>CALCALC • BODY FUEL</Text>
-      </View>
-
-      {/* Center Hero Showcase */}
-      <View style={styles.centerBlock}>
-        <MuscleLogo size={68} />
-
-        <Text style={styles.greetingLabel}>
-          {getGreeting()}
-          {firstName ? `, ${firstName.toUpperCase()}` : ''}
-        </Text>
-
-        <Text style={styles.heroHeadline}>
-          {user ? 'Daily Readiness' : 'Precision Nutrition'}
-        </Text>
-
-        {user ? (
-          <View style={styles.scoreWrap}>
-            <LaurelScore score={fuelScore} label="Your Wellness & Fuel Score" />
-          </View>
-        ) : (
-          <Text style={styles.guestSub}>
-            Track calories, macros, and everyday meals with studio-grade clarity.
-          </Text>
-        )}
-
-        {/* Obsidian Glass Quick Telemetry Strip */}
-        <View style={styles.metricsStrip}>
-          <View style={styles.metricPill}>
-            <Text style={styles.metricLabel}>INTAKE</Text>
-            <Text style={styles.metricVal}>{Math.round(consumedKcal)}</Text>
-            <Text style={styles.metricUnit}>kcal</Text>
-          </View>
-
-          <View style={styles.metricDivider} />
-
-          <View style={styles.metricPill}>
-            <Text style={styles.metricLabel}>TARGET</Text>
-            <Text style={styles.metricVal}>{Math.round(targetKcal)}</Text>
-            <Text style={styles.metricUnit}>kcal</Text>
-          </View>
-
-          <View style={styles.metricDivider} />
-
-          <View style={styles.metricPill}>
-            <Text style={styles.metricLabel}>ACTIVE</Text>
-            <Text style={[styles.metricVal, { color: COLORS.accent }]}>
-              {activeDays}
-            </Text>
-            <Text style={styles.metricUnit}>days</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Bottom Swipe-Up Handle Prompt */}
-      <TouchableOpacity
-        style={styles.swipePromptArea}
-        onPress={triggerOpen}
-        activeOpacity={0.85}
+      {/* Top Curved Dusk Violet -> Sunset Peach Hero Section */}
+      <View
+        style={[
+          styles.heroCard,
+          { paddingTop: Math.max(insets.top + 16, 44) },
+        ]}
       >
-        <Animated.View
-          style={[
-            styles.chevronsWrap,
-            { transform: [{ translateY: bounceAnim }] },
-          ]}
-        >
-          <Ionicons
-            name="chevron-up"
-            size={18}
-            color="rgba(91, 181, 255, 0.55)"
-            style={{ marginBottom: -8 }}
-          />
-          <Ionicons name="chevron-up" size={22} color={COLORS.accent} />
-        </Animated.View>
+        <DuskMeshBackdrop />
 
-        <View style={styles.swipePill}>
-          <Text style={styles.swipePillText}>
-            {user ? 'Scroll Up to Enter Dashboard' : 'Scroll Up to Get Started'}
+        <View style={styles.heroTopBar}>
+          <Text style={styles.greetingText}>
+            {firstName ? `Hello, ${firstName}` : `${getGreeting()}, Athlete`}
           </Text>
+          <View style={styles.brandCircle}>
+            <MuscleLogo size={38} glow={false} />
+          </View>
         </View>
 
-        <View style={styles.dragBar} />
-      </TouchableOpacity>
+        <View style={styles.heroCenter}>
+          <Text style={styles.heroEyebrow}>
+            {user ? 'Daily Balance (kcal)' : 'CalCalc Body Fuel'}
+          </Text>
+          <Text style={styles.heroBigValue}>
+            {user ? remaining.toLocaleString() : '129+ Foods'}
+          </Text>
+          <View style={styles.heroPill}>
+            <Text style={styles.heroPillText}>
+              {user ? `${pct}% logged • Score ${fuelScore}` : 'Smart Macro & Unit Engine'}
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Pitch-Black Lower Section with Charcoal Cards & Swipe-Up Lime CTA */}
+      <View
+        style={[
+          styles.lowerBody,
+          { paddingBottom: Math.max(insets.bottom + 24, 34) },
+        ]}
+      >
+        <View style={styles.telemetryCards}>
+          <View style={styles.infoRowCard}>
+            <View style={styles.iconCircleDark}>
+              <Ionicons name="flame-outline" size={20} color={COLORS.text} />
+            </View>
+            <View style={styles.infoRowMid}>
+              <Text style={styles.infoRowTitle}>Daily Calorie Intake</Text>
+              <Text style={styles.infoRowSub}>
+                {Math.round(consumedKcal)} kcal{' '}
+                <Text style={{ color: COLORS.success }}>• {pct}%</Text>
+              </Text>
+            </View>
+            <View style={styles.outlineTag}>
+              <Text style={styles.outlineTagText}>TODAY</Text>
+            </View>
+          </View>
+
+          <View style={styles.infoRowCard}>
+            <View style={styles.iconCircleDark}>
+              <Ionicons name="trophy-outline" size={20} color={COLORS.primary} />
+            </View>
+            <View style={styles.infoRowMid}>
+              <Text style={styles.infoRowTitle}>Active Consistency</Text>
+              <Text style={styles.infoRowSub}>
+                {activeDays} active days{' '}
+                <Text style={{ color: COLORS.success }}>• Synced</Text>
+              </Text>
+            </View>
+            <View style={styles.outlineTag}>
+              <Text style={styles.outlineTagText}>28D</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Bottom Interactive Scroll-Up Handle */}
+        <TouchableOpacity
+          style={styles.swipePromptArea}
+          onPress={triggerOpen}
+          activeOpacity={0.85}
+        >
+          <Animated.View
+            style={[
+              styles.chevronsWrap,
+              { transform: [{ translateY: bounceAnim }] },
+            ]}
+          >
+            <Ionicons
+              name="chevron-up"
+              size={18}
+              color="rgba(235, 248, 138, 0.5)"
+              style={{ marginBottom: -8 }}
+            />
+            <Ionicons name="chevron-up" size={22} color={COLORS.primary} />
+          </Animated.View>
+
+          <View style={styles.limeStartPill}>
+            <Text style={styles.limeStartText}>
+              {user ? 'Scroll Up to Start App' : 'Scroll Up to Sign In'}
+            </Text>
+            <Ionicons name="arrow-up" size={16} color={COLORS.primaryText} />
+          </View>
+        </TouchableOpacity>
+      </View>
     </Animated.View>
   );
 }
@@ -216,128 +232,136 @@ const styles = StyleSheet.create({
     zIndex: 50,
     backgroundColor: COLORS.background,
     justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.xl,
   },
-  topPill: {
+  heroCard: {
+    borderBottomLeftRadius: 36,
+    borderBottomRightRadius: 36,
+    overflow: 'hidden',
+    paddingHorizontal: SPACING.xl,
+    paddingBottom: 42,
+    borderBottomWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  heroTopBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    backgroundColor: 'rgba(20, 26, 37, 0.72)',
-    borderWidth: 1,
-    borderColor: COLORS.surfaceBorderBright,
+    justifyContent: 'space-between',
+    marginBottom: 34,
+  },
+  greetingText: {
+    fontSize: 17,
+    fontWeight: '400',
+    color: COLORS.text,
+  },
+  brandCircle: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  heroCenter: {
+    alignItems: 'center',
+    paddingVertical: SPACING.md,
+  },
+  heroEyebrow: {
+    fontSize: 13,
+    color: 'rgba(255, 255, 255, 0.72)',
+    marginBottom: 8,
+  },
+  heroBigValue: {
+    fontSize: 44,
+    fontWeight: '400',
+    color: COLORS.text,
+    letterSpacing: -1,
+  },
+  heroPill: {
+    marginTop: SPACING.md,
+    backgroundColor: 'rgba(255, 255, 255, 0.14)',
     paddingHorizontal: 14,
-    paddingVertical: 7,
+    paddingVertical: 6,
     borderRadius: RADIUS.full,
   },
-  liveDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: COLORS.accent,
-  },
-  topPillText: {
-    fontSize: 10.5,
-    fontWeight: '700',
-    color: COLORS.textSecondary,
-    letterSpacing: 1.4,
-  },
-  centerBlock: {
-    width: '100%',
-    alignItems: 'center',
-  },
-  greetingLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: COLORS.accent,
-    letterSpacing: 1.8,
-    marginTop: SPACING.lg,
-  },
-  heroHeadline: {
-    fontSize: 28,
+  heroPillText: {
+    fontSize: 12,
     fontWeight: '500',
     color: COLORS.text,
-    marginTop: 6,
-    letterSpacing: -0.5,
-    textAlign: 'center',
   },
-  scoreWrap: {
-    marginTop: SPACING.md,
+  lowerBody: {
+    flex: 1,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.xl,
+    justifyContent: 'space-between',
   },
-  guestSub: {
-    fontSize: 13.5,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-    marginTop: SPACING.sm,
-    lineHeight: 20,
-    paddingHorizontal: SPACING.md,
+  telemetryCards: {
+    gap: SPACING.md,
   },
-  metricsStrip: {
+  infoRowCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(14, 18, 26, 0.9)',
+    backgroundColor: COLORS.surface,
     borderRadius: RADIUS.xl,
+    padding: SPACING.md + 2,
     borderWidth: 1,
     borderColor: COLORS.surfaceBorder,
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.lg,
-    marginTop: SPACING.xl,
-    width: '100%',
+    gap: SPACING.md,
   },
-  metricPill: {
-    flex: 1,
+  iconCircleDark: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.surfaceLight,
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  metricLabel: {
-    fontSize: 9.5,
-    fontWeight: '700',
-    color: COLORS.textMuted,
-    letterSpacing: 1,
-    marginBottom: 4,
+  infoRowMid: {
+    flex: 1,
   },
-  metricVal: {
-    fontSize: 20,
+  infoRowTitle: {
+    fontSize: 15,
     fontWeight: '500',
     color: COLORS.text,
   },
-  metricUnit: {
-    fontSize: 10.5,
-    color: COLORS.textMuted,
-    marginTop: 1,
+  infoRowSub: {
+    fontSize: 12.5,
+    color: COLORS.textSecondary,
+    marginTop: 2,
   },
-  metricDivider: {
-    width: 1,
-    height: 30,
-    backgroundColor: COLORS.surfaceBorder,
+  outlineTag: {
+    borderWidth: 1,
+    borderColor: COLORS.surfaceBorderBright,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: RADIUS.full,
+  },
+  outlineTagText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
   },
   swipePromptArea: {
     alignItems: 'center',
     paddingVertical: SPACING.sm,
-    width: '100%',
   },
   chevronsWrap: {
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: 8,
   },
-  swipePill: {
-    backgroundColor: 'rgba(22, 28, 38, 0.9)',
-    borderWidth: 1,
-    borderColor: COLORS.surfaceBorderBright,
-    paddingHorizontal: 20,
-    paddingVertical: 11,
+  limeStartPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 28,
+    paddingVertical: 15,
     borderRadius: RADIUS.full,
+    width: '100%',
   },
-  swipePillText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: COLORS.text,
-    letterSpacing: 0.3,
-  },
-  dragBar: {
-    width: 44,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    marginTop: SPACING.md,
+  limeStartText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: COLORS.primaryText,
   },
 });

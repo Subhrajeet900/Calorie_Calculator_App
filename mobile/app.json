@@ -14,7 +14,7 @@
       "versionCode": 1,
       "package": "com.subhrajeet.caloriecalculator",
       "adaptiveIcon": {
-        "backgroundColor": "#05070B",
+        "backgroundColor": "#06070B",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"

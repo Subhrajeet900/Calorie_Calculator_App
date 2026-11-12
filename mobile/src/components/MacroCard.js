@@ -10,78 +10,87 @@ export default function MacroCard({
   consumedCarbs = 0,
   consumedFat = 0,
 }) {
-  const renderMacroCapsule = (label, consumed, target, color, unit = 'g') => {
-    const safeTarget = Math.max(1, target);
-    const pct = Math.min(100, Math.round((consumed / safeTarget) * 100));
-    const remaining = Math.max(0, Math.round(target - consumed));
-    const isExceeded = consumed > target;
-
-    return (
-      <View style={styles.macroCapsule} key={label}>
-        <View style={styles.capsuleTop}>
-          <View style={styles.capsuleLabelGroup}>
-            <View style={[styles.glowDot, { backgroundColor: color }]} />
-            <Text style={styles.macroLabel}>{label.toUpperCase()}</Text>
-          </View>
-          <Text style={styles.macroFraction}>
-            <Text style={[styles.consumedBold, { color }]}>{Math.round(consumed)}</Text>
-            <Text style={styles.targetMuted}> / {Math.round(target)}{unit}</Text>
-          </Text>
-        </View>
-
-        {/* Progress Meter */}
-        <View style={styles.meterTrack}>
-          <View
-            style={[
-              styles.meterFill,
-              {
-                width: `${pct}%`,
-                backgroundColor: isExceeded ? COLORS.danger : color,
-              },
-            ]}
-          />
-        </View>
-
-        <View style={styles.capsuleBottom}>
-          <Text style={styles.pctText}>{pct}%</Text>
-          <Text style={styles.remainingText}>
-            {isExceeded ? 'Target hit' : `${remaining}g left`}
-          </Text>
-        </View>
-      </View>
-    );
-  };
+  const macros = [
+    {
+      label: 'PROTEIN',
+      consumed: consumedProtein,
+      target: targetProtein,
+      color: COLORS.protein,
+    },
+    {
+      label: 'CARBS',
+      consumed: consumedCarbs,
+      target: targetCarbs,
+      color: COLORS.carbs,
+    },
+    {
+      label: 'FATS',
+      consumed: consumedFat,
+      target: targetFat,
+      color: COLORS.fat,
+    },
+  ];
 
   return (
-    <View style={styles.card}>
+    <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>MACRO FUEL SPLIT</Text>
-        <Text style={styles.ratioText}>P: 30% • C: 45% • F: 25%</Text>
+        <Text style={styles.title}>MACRONUTRIENT SPLIT</Text>
+        <View style={styles.badge}>
+          <Text style={styles.badgeText}>G / DAY</Text>
+        </View>
       </View>
 
       <View style={styles.capsulesList}>
-        {renderMacroCapsule('Protein', consumedProtein, targetProtein, COLORS.protein)}
-        {renderMacroCapsule('Carbohydrates', consumedCarbs, targetCarbs, COLORS.carbs)}
-        {renderMacroCapsule('Healthy Fats', consumedFat, targetFat, COLORS.fat)}
+        {macros.map((m) => {
+          const safeTarget = Math.max(m.target, 1);
+          const pct = Math.min(100, Math.round((m.consumed / safeTarget) * 100));
+          const rem = Math.max(0, Math.round(m.target - m.consumed));
+          return (
+            <View key={m.label} style={styles.macroCapsule}>
+              <View style={styles.capsuleTop}>
+                <View style={styles.capsuleLabelGroup}>
+                  <View style={[styles.glowDot, { backgroundColor: m.color }]} />
+                  <Text style={styles.macroLabel}>{m.label}</Text>
+                </View>
+
+                <Text style={styles.macroFraction}>
+                  <Text style={[styles.consumedBold, { color: COLORS.text }]}>
+                    {Math.round(m.consumed)}g
+                  </Text>
+                  <Text style={styles.targetMuted}> / {Math.round(m.target)}g</Text>
+                </Text>
+              </View>
+
+              <View style={styles.meterTrack}>
+                <View
+                  style={[
+                    styles.meterFill,
+                    { width: `${pct}%`, backgroundColor: m.color },
+                  ]}
+                />
+              </View>
+
+              <View style={styles.capsuleBottom}>
+                <Text style={styles.pctText}>{pct}%</Text>
+                <Text style={styles.remainingText}>{rem}g left</Text>
+              </View>
+            </View>
+          );
+        })}
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
+  container: {
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.xl,
-    padding: SPACING.md,
+    padding: SPACING.lg,
     marginHorizontal: SPACING.lg,
-    marginTop: SPACING.md,
+    marginBottom: SPACING.md,
     borderWidth: 1,
     borderColor: COLORS.surfaceBorder,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
   },
   header: {
     flexDirection: 'row',
@@ -90,26 +99,33 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   title: {
-    fontSize: 10,
-    fontWeight: '800',
+    fontSize: 11,
+    fontWeight: '700',
     color: COLORS.textMuted,
     letterSpacing: 1.2,
   },
-  ratioText: {
+  badge: {
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: RADIUS.full,
+    borderWidth: 1,
+    borderColor: COLORS.surfaceBorderBright,
+  },
+  badgeText: {
     fontSize: 10,
     fontWeight: '700',
-    color: COLORS.primary,
-    letterSpacing: 0.5,
+    color: COLORS.textSecondary,
+    letterSpacing: 0.6,
   },
   capsulesList: {
     gap: SPACING.sm,
   },
   macroCapsule: {
-    backgroundColor: COLORS.surfaceLight,
+    backgroundColor: '#161820',
     borderRadius: RADIUS.md,
     padding: SPACING.sm + 2,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.04)',
+    borderColor: 'rgba(255, 255, 255, 0.05)',
   },
   capsuleTop: {
     flexDirection: 'row',
@@ -146,7 +162,7 @@ const styles = StyleSheet.create({
   meterTrack: {
     height: 6,
     borderRadius: RADIUS.full,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
     overflow: 'hidden',
     marginBottom: 6,
   },

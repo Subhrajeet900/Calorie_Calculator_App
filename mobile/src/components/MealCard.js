@@ -1,127 +1,196 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  LayoutAnimation,
+  Platform,
+  UIManager,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, RADIUS } from '../constants/theme';
-import { getServingMeta } from '../constants/defaultFoods';
 
-function formatItemQuantity(item) {
-  const qty = Number(item?.quantity) || 0;
-  const meta = getServingMeta(item?.food);
-  if (meta.hasCountUnit && meta.servingSize > 0) {
-    const count = qty / meta.servingSize;
-    const roundedHalf = Math.round(count * 2) / 2;
-    if (roundedHalf > 0 && Math.abs(count - roundedHalf) < 0.08) {
-      const unitWord =
-        roundedHalf === 1 || meta.unitLabel.endsWith('s')
-          ? meta.unitLabel
-          : `${meta.unitLabel}s`;
-      return `${roundedHalf} ${unitWord} (${Math.round(qty)}g)`;
-    }
-  }
-  return `${Math.round(qty)}g`;
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
 const MEAL_CONFIG = {
   breakfast: {
     title: 'Breakfast',
-    sub: 'Morning Fuel',
     icon: 'sunny-outline',
+    tag: 'AM',
+    tint: COLORS.primary,
   },
   lunch: {
     title: 'Lunch',
-    sub: 'Midday Power',
     icon: 'restaurant-outline',
+    tag: 'MID',
+    tint: COLORS.carbs,
   },
   dinner: {
     title: 'Dinner',
-    sub: 'Night Recovery',
     icon: 'moon-outline',
+    tag: 'PM',
+    tint: COLORS.fat,
   },
   snack: {
     title: 'Snacks',
-    sub: 'Micro Energy',
     icon: 'flash-outline',
+    tag: 'FUEL',
+    tint: COLORS.water,
   },
 };
 
 export default function MealCard({
-  mealType = 'breakfast',
-  meal = null,
-  totals = { calories: 0, protein: 0, carbs: 0, fat: 0, item_count: 0 },
+  mealType,
+  meal,
+  totals,
   onAddFood,
   onDeleteItem,
 }) {
+  const [expanded, setExpanded] = useState(false);
+
+  const config = MEAL_CONFIG[mealType] || MEAL_CONFIG.snack;
   const items = meal?.items || [];
-  const config = MEAL_CONFIG[mealType] || MEAL_CONFIG.breakfast;
+  const totalCal = Math.round(totals?.calories || 0);
+  const totalProt = Math.round(totals?.protein || 0);
+  const totalCarbs = Math.round(totals?.carbs || 0);
+  const totalFat = Math.round(totals?.fat || 0);
+
+  const toggleExpand = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpanded((prev) => !prev);
+  };
 
   return (
-    <View style={styles.card}>
-      {/* Meal Header */}
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <View style={styles.iconCircle}>
-            <Ionicons name={config.icon} size={16} color={COLORS.primary} />
-          </View>
-          <View>
-            <Text style={styles.mealTitle}>{config.title}</Text>
-            <Text style={styles.mealSub}>{config.sub}</Text>
+    <View style={[styles.card, expanded && styles.cardExpanded]}>
+      {/* Main Horizontal Row matching Reference Charcoal Card */}
+      <TouchableOpacity
+        style={styles.headerRow}
+        onPress={toggleExpand}
+        activeOpacity={0.82}
+      >
+        <View style={styles.leftCircle}>
+          <Ionicons name={config.icon} size={20} color="#F8FAFC" />
+        </View>
+
+        <View style={styles.centerMeta}>
+          <Text style={styles.title}>{config.title}</Text>
+          <View style={styles.subLine}>
+            <Text style={styles.kcalText}>
+              {totalCal.toLocaleString()} kcal
+            </Text>
+            {items.length > 0 ? (
+              <Text style={styles.deltaMint}>
+                +{totalProt}g P · {items.length}{' '}
+                {items.length === 1 ? 'item' : 'items'}
+              </Text>
+            ) : (
+              <Text style={styles.emptyHint}>Tap + Add</Text>
+            )}
           </View>
         </View>
 
-        <View style={styles.headerRight}>
-          <Text style={styles.totalKcal}>{Math.round(totals.calories || 0)}</Text>
-          <Text style={styles.kcalUnit}>kcal</Text>
-        </View>
-      </View>
+        {/* Outlined Oval Badge right — triggers Add Food directly */}
+        <TouchableOpacity
+          style={[styles.ovalBadge, items.length > 0 && styles.ovalBadgeActive]}
+          onPress={() => onAddFood(mealType)}
+          activeOpacity={0.75}
+        >
+          <Ionicons
+            name="add"
+            size={13}
+            color={items.length > 0 ? COLORS.primary : COLORS.text}
+          />
+          <Text
+            style={[
+              styles.ovalBadgeText,
+              items.length > 0 && styles.ovalBadgeTextActive,
+            ]}
+          >
+            {config.tag}
+          </Text>
+        </TouchableOpacity>
 
-      {/* Logged Items List */}
-      {items.length > 0 && (
-        <View style={styles.itemsList}>
-          {items.map((item) => (
-            <View style={styles.itemRow} key={item.id}>
-              <View style={styles.itemInfo}>
-                <Text style={styles.itemName} numberOfLines={1}>
-                  {item.food?.name || 'Logged Food'}
-                </Text>
-                <View style={styles.itemMeta}>
-                  <Text style={styles.itemQuantity}>{formatItemQuantity(item)}</Text>
-                  <Text style={styles.metaDot}>•</Text>
-                  <Text style={styles.itemKcal}>{Math.round(item.calories)} kcal</Text>
-                  <Text style={styles.metaDot}>•</Text>
-                  <Text style={[styles.macroPill, { color: COLORS.protein }]}>
-                    P: {Math.round(item.protein)}g
-                  </Text>
-                  <Text style={[styles.macroPill, { color: COLORS.carbs }]}>
-                    C: {Math.round(item.carbs)}g
-                  </Text>
-                  <Text style={[styles.macroPill, { color: COLORS.fat }]}>
-                    F: {Math.round(item.fat)}g
-                  </Text>
-                </View>
-              </View>
+        <Ionicons
+          name={expanded ? 'chevron-up' : 'chevron-down'}
+          size={15}
+          color={COLORS.textMuted}
+          style={styles.chevron}
+        />
+      </TouchableOpacity>
 
+      {/* Expanded Food Items List */}
+      {expanded && (
+        <View style={styles.itemsBody}>
+          <View style={styles.hairline} />
+
+          {items.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateText}>
+                No food logged for {config.title.toLowerCase()} yet.
+              </Text>
               <TouchableOpacity
-                style={styles.deleteBtn}
-                onPress={() => onDeleteItem && onDeleteItem(item.id)}
-                activeOpacity={0.6}
-                accessibilityLabel="Delete item"
+                style={styles.whiteAddPill}
+                onPress={() => onAddFood(mealType)}
+                activeOpacity={0.85}
               >
-                <Ionicons name="trash-outline" size={15} color={COLORS.textMuted} />
+                <Ionicons name="add" size={15} color={COLORS.ctaWhiteText} />
+                <Text style={styles.whiteAddPillText}>Add Food</Text>
               </TouchableOpacity>
             </View>
-          ))}
+          ) : (
+            <View style={styles.itemsList}>
+              <View style={styles.macroSummaryRow}>
+                <Text style={styles.macroTag}>P {totalProt}g</Text>
+                <Text style={styles.macroTag}>C {totalCarbs}g</Text>
+                <Text style={styles.macroTag}>F {totalFat}g</Text>
+              </View>
+
+              {items.map((item, idx) => (
+                <View
+                  key={item.id || `${mealType}_${idx}`}
+                  style={[
+                    styles.itemRow,
+                    idx === items.length - 1 && styles.itemRowLast,
+                  ]}
+                >
+                  <View style={styles.itemLeft}>
+                    <Text style={styles.itemName} numberOfLines={1}>
+                      {item.food_name || 'Logged Food'}
+                    </Text>
+                    <Text style={styles.itemSub}>
+                      {Math.round(item.quantity_grams || 0)}g  •  P:{Math.round(item.protein || 0)}g  C:{Math.round(item.carbs || 0)}g  F:{Math.round(item.fat || 0)}g
+                    </Text>
+                  </View>
+
+                  <View style={styles.itemRight}>
+                    <Text style={styles.itemCal}>{Math.round(item.calories || 0)}</Text>
+                    <Text style={styles.itemUnit}>kcal</Text>
+                    <TouchableOpacity
+                      style={styles.delBtn}
+                      onPress={() => onDeleteItem(item.id)}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    >
+                      <Ionicons name="trash-outline" size={15} color={COLORS.danger} />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ))}
+
+              <TouchableOpacity
+                style={styles.limeInlineBtn}
+                onPress={() => onAddFood(mealType)}
+                activeOpacity={0.85}
+              >
+                <Ionicons name="add-circle-outline" size={15} color={COLORS.primaryText} />
+                <Text style={styles.limeInlineBtnText}>Add More to {config.title}</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       )}
-
-      {/* Add Food Button */}
-      <TouchableOpacity
-        style={styles.addBtn}
-        onPress={() => onAddFood(mealType)}
-        activeOpacity={0.7}
-      >
-        <Ionicons name="add-circle" size={16} color={COLORS.primary} />
-        <Text style={styles.addBtnText}>+ Log to {config.title}</Text>
-      </TouchableOpacity>
     </View>
   );
 }
@@ -130,133 +199,195 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.xl,
-    padding: SPACING.md,
-    marginHorizontal: SPACING.lg,
-    marginTop: SPACING.md,
     borderWidth: 1,
     borderColor: COLORS.surfaceBorder,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 3,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: 14,
+    marginBottom: 10,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.xs,
+  cardExpanded: {
+    borderColor: COLORS.surfaceBorderBright,
   },
-  headerLeft: {
+  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.sm,
   },
-  iconCircle: {
-    width: 34,
-    height: 34,
-    borderRadius: RADIUS.md,
-    backgroundColor: COLORS.primaryAlpha,
+  leftCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#1B1D26',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.surfaceBorderActive,
+    marginRight: 12,
   },
-  mealTitle: {
-    fontSize: 15,
-    fontWeight: '800',
+  centerMeta: {
+    flex: 1,
+    paddingRight: 8,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: '700',
     color: COLORS.text,
+    letterSpacing: -0.2,
   },
-  mealSub: {
-    fontSize: 10,
+  subLine: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 3,
+  },
+  kcalText: {
+    fontSize: 13,
     fontWeight: '600',
+    color: COLORS.textSecondary,
+  },
+  deltaMint: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: COLORS.success,
+  },
+  emptyHint: {
+    fontSize: 12,
+    fontWeight: '500',
     color: COLORS.textMuted,
+  },
+  ovalBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 11,
+    paddingVertical: 5,
+    borderRadius: RADIUS.full,
+    borderWidth: 1,
+    borderColor: COLORS.surfaceBorderBright,
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+  },
+  ovalBadgeActive: {
+    borderColor: COLORS.surfaceBorderActive,
+    backgroundColor: COLORS.primaryAlpha,
+  },
+  ovalBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.text,
     letterSpacing: 0.4,
   },
-  headerRight: {
+  ovalBadgeTextActive: {
+    color: COLORS.primary,
+  },
+  chevron: {
+    marginLeft: 8,
+  },
+  itemsBody: {
+    marginTop: 12,
+  },
+  hairline: {
+    height: 1,
+    backgroundColor: COLORS.surfaceBorder,
+    marginBottom: 10,
+  },
+  emptyState: {
     flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 3,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+    paddingVertical: 4,
   },
-  totalKcal: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: COLORS.text,
-  },
-  kcalUnit: {
-    fontSize: 11,
+  emptyStateText: {
+    flex: 1,
+    fontSize: 12,
     color: COLORS.textMuted,
-    fontWeight: '600',
+  },
+  whiteAddPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: COLORS.ctaWhite,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: RADIUS.full,
+  },
+  whiteAddPillText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: COLORS.ctaWhiteText,
   },
   itemsList: {
-    borderTopWidth: 1,
-    borderTopColor: COLORS.surfaceBorder,
-    paddingTop: SPACING.xs,
-    marginTop: SPACING.xs,
-    marginBottom: SPACING.xs,
+    gap: 4,
+  },
+  macroSummaryRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 6,
+  },
+  macroTag: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.textSecondary,
+    backgroundColor: COLORS.surfaceLight,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: RADIUS.full,
   },
   itemRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: SPACING.xs + 2,
+    paddingVertical: 9,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.03)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
-  itemInfo: {
+  itemRowLast: {
+    borderBottomWidth: 0,
+  },
+  itemLeft: {
     flex: 1,
-    paddingRight: SPACING.sm,
+    paddingRight: 10,
   },
   itemName: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
     color: COLORS.text,
-    marginBottom: 2,
   },
-  itemMeta: {
+  itemSub: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+    marginTop: 2,
+  },
+  itemRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    flexWrap: 'wrap',
     gap: 4,
   },
-  itemQuantity: {
-    fontSize: 11,
-    color: COLORS.textSecondary,
-    fontWeight: '600',
-  },
-  metaDot: {
-    fontSize: 10,
-    color: COLORS.textMuted,
-  },
-  itemKcal: {
-    fontSize: 11,
+  itemCal: {
+    fontSize: 14,
+    fontWeight: '800',
     color: COLORS.text,
-    fontWeight: '700',
   },
-  macroPill: {
-    fontSize: 10,
-    fontWeight: '700',
+  itemUnit: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+    marginRight: 6,
   },
-  deleteBtn: {
-    padding: SPACING.xs,
-    borderRadius: RADIUS.sm,
+  delBtn: {
+    padding: 4,
   },
-  addBtn: {
+  limeInlineBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
+    marginTop: 8,
     paddingVertical: 9,
-    backgroundColor: COLORS.surfaceLight,
-    borderRadius: RADIUS.md,
-    marginTop: SPACING.xs,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: RADIUS.full,
+    backgroundColor: COLORS.primary,
   },
-  addBtnText: {
+  limeInlineBtnText: {
     fontSize: 12,
-    fontWeight: '700',
-    color: COLORS.primary,
-    letterSpacing: 0.3,
+    fontWeight: '800',
+    color: COLORS.primaryText,
   },
 });
