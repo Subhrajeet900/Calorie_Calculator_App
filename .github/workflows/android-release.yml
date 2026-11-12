@@ -104,16 +104,21 @@ jobs:
         run: |
           TAG="${{ steps.meta.outputs.release_tag }}"
           APK="${{ steps.meta.outputs.apk_name }}"
+          APP_VER="${{ steps.meta.outputs.app_version }}"
           SHORT_SHA="${GITHUB_SHA::7}"
+
+          {
+            echo "Automated Android APK release built from main commit ${SHORT_SHA}."
+            echo ""
+            echo "### Download & Install"
+            echo "1. Download **${APK}** below on your Android device."
+            echo "2. Open the downloaded .apk file to install or update **CalCalc**."
+            echo ""
+            echo "- Version: ${APP_VER} (build ${GITHUB_RUN_NUMBER})"
+            echo "- Backend API: https://calorie-calculator-app.onrender.com"
+          } > /tmp/release-notes.md
 
           gh release create "$TAG" "$APK" \
             --title "CalCalc $TAG" \
-            --notes "Automated Android APK release built from \`main\` commit \`$SHORT_SHA\`.
-
-### Download & Install
-1. Download **$APK** below on your Android device.
-2. Open the downloaded \`.apk\` file to install or update **CalCalc**.
-
-- **Version:** \`${{ steps.meta.outputs.app_version }}\` (build \`${GITHUB_RUN_NUMBER}\`)
-- **Backend API:** \`https://calorie-calculator-app.onrender.com\`" \
+            --notes-file /tmp/release-notes.md \
             --latest
