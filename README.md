@@ -165,8 +165,8 @@ cd backend
 go test -v ./...
 ```
 
-## after changes to generate new apk file 
-then in terminal do this - 
+## after every changes in the app then generate new apk file to download in phone . 
+then in terminal write this - 
 
 ```bash
 cd "C:\Users\subhrajeet\Calorie Calculator\mobile"
