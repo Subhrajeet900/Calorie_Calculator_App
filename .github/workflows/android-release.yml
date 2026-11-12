@@ -1,0 +1,119 @@
+name: Build & Release Android APK
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/android-release.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-apk-release
+  cancel-in-progress: false
+
+jobs:
+  build-and-release-apk:
+    name: Build CalCalc APK & Publish GitHub Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Setup Java 17 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle cache
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Install mobile dependencies
+        working-directory: mobile
+        run: npm ci
+
+      - name: Resolve version and increment Android versionCode
+        id: meta
+        working-directory: mobile
+        run: |
+          APP_VERSION=$(node -e "const j=require('./app.json'); console.log(j.expo.version || '1.0.0');")
+          RUN_NUM="${GITHUB_RUN_NUMBER}"
+          RELEASE_TAG="v${APP_VERSION}-build.${RUN_NUM}"
+          APK_NAME="CalCalc-${RELEASE_TAG}.apk"
+
+          node -e "
+            const fs = require('fs');
+            const j = JSON.parse(fs.readFileSync('./app.json', 'utf8'));
+            j.expo.android = j.expo.android || {};
+            j.expo.android.versionCode = Number('${RUN_NUM}');
+            fs.writeFileSync('./app.json', JSON.stringify(j, null, 2));
+          "
+
+          echo "app_version=${APP_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "release_tag=${RELEASE_TAG}" >> "$GITHUB_OUTPUT"
+          echo "apk_name=${APK_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Expo Prebuild (Android)
+        working-directory: mobile
+        run: npx expo prebuild --platform android --non-interactive
+
+      - name: Configure Gradle JVM heap memory
+        working-directory: mobile/android
+        run: |
+          if grep -q '^org.gradle.jvmargs=' gradle.properties; then
+            sed -i 's/^org.gradle.jvmargs=.*/org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m/' gradle.properties
+          else
+            echo 'org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m' >> gradle.properties
+          fi
+
+      - name: Build Android Release APK
+        working-directory: mobile/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=armeabi-v7a,arm64-v8a
+
+      - name: Prepare APK Artifact
+        working-directory: mobile
+        run: |
+          APK_PATH="android/app/build/outputs/apk/release/app-release.apk"
+          if [ ! -f "$APK_PATH" ]; then
+            echo "Error: APK not found at $APK_PATH"
+            exit 1
+          fi
+          cp "$APK_PATH" "${{ steps.meta.outputs.apk_name }}"
+          ls -lh "${{ steps.meta.outputs.apk_name }}"
+
+      - name: Create GitHub Release & Upload APK
+        working-directory: mobile
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ steps.meta.outputs.release_tag }}"
+          APK="${{ steps.meta.outputs.apk_name }}"
+          SHORT_SHA="${GITHUB_SHA::7}"
+
+          gh release create "$TAG" "$APK" \
+            --title "CalCalc $TAG" \
+            --notes "Automated Android APK release built from \`main\` commit \`$SHORT_SHA\`.
+
+### Download & Install
+1. Download **$APK** below on your Android device.
+2. Open the downloaded \`.apk\` file to install or update **CalCalc**.
+
+- **Version:** \`${{ steps.meta.outputs.app_version }}\` (build \`${GITHUB_RUN_NUMBER}\`)
+- **Backend API:** \`https://calorie-calculator-app.onrender.com\`" \
+            --latest
