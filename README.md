@@ -1,6 +1,6 @@
 # Calorie Calculator App
 
-> A fast, privacy-friendly mobile app (Expo / React Native) with a Go backend (Gin + GORM) that calculates daily calorie needs, logs meals, and tracks nutrition goals — **100% zero-Docker, zero tracking, and lightweight**.
+> A fast, privacy-friendly mobile app (Expo / React Native) with a Go backend (Gin + GORM) that calculates daily calories, logs meals, and tracks nutrition goals — **100% zero-Docker, zero tracking, and lightweight**.
 
 ---
 
